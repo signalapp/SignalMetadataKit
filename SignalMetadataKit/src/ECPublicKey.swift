@@ -22,7 +22,7 @@ import Foundation
 
     // https://github.com/signalapp/libsignal-protocol-java/blob/master/java/src/main/java/org/whispersystems/libsignal/ecc/Curve.java#L30
     public init(serializedKeyData: Data) throws {
-        let parser = SSKDataParser(data: serializedKeyData)
+        let parser = DataParser(data: serializedKeyData)
 
         let typeByte = try parser.nextByte(name: "type byte")
         guard typeByte == ECPublicKey.keyTypeDJB else {
