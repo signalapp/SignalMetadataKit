@@ -46,15 +46,17 @@ import Foundation
     }
 
     @objc public func toProto() throws -> SMKProtoUnidentifiedSenderMessageMessage {
-        let builder = SMKProtoUnidentifiedSenderMessageMessage.builder()
+        let builderType: SMKProtoUnidentifiedSenderMessageMessage.SMKProtoUnidentifiedSenderMessageMessageType
         switch messageType {
         case .whisper:
-            builder.setType(SMKProtoUnidentifiedSenderMessageMessage.SMKProtoUnidentifiedSenderMessageMessageType.message)
+            builderType = .message
         case .prekey:
-            builder.setType(SMKProtoUnidentifiedSenderMessageMessage.SMKProtoUnidentifiedSenderMessageMessageType.prekeyMessage)
+            builderType = .prekeyMessage
         }
-        builder.setSenderCertificate(try senderCertificate.toProto())
-        builder.setContent(contentData)
+
+        let builder = SMKProtoUnidentifiedSenderMessageMessage.builder(type: builderType,
+                                                                       senderCertificate: try senderCertificate.toProto(),
+                                                                       content: contentData)
         return try builder.build()
     }
 

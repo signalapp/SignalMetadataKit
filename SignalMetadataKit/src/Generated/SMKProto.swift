@@ -16,18 +16,17 @@ public enum SMKProtoError: Error {
 
     // MARK: - SMKProtoServerCertificateCertificateBuilder
 
-    @objc public class func builder() -> SMKProtoServerCertificateCertificateBuilder {
-        return SMKProtoServerCertificateCertificateBuilder()
+    @objc public class func builder(id: UInt32, key: Data) -> SMKProtoServerCertificateCertificateBuilder {
+        return SMKProtoServerCertificateCertificateBuilder(id: id, key: key)
     }
 
     @objc public class SMKProtoServerCertificateCertificateBuilder: NSObject {
 
         private var proto = SMKProtos_ServerCertificate.Certificate()
 
-        @objc public override init() {}
+        @objc fileprivate override init() {}
 
-        // Initializer for required fields
-        @objc public init(id: UInt32, key: Data) {
+        @objc fileprivate init(id: UInt32, key: Data) {
             super.init()
 
             setId(id)
@@ -119,18 +118,17 @@ extension SMKProtoServerCertificateCertificate.SMKProtoServerCertificateCertific
 
     // MARK: - SMKProtoServerCertificateBuilder
 
-    @objc public class func builder() -> SMKProtoServerCertificateBuilder {
-        return SMKProtoServerCertificateBuilder()
+    @objc public class func builder(certificate: Data, signature: Data) -> SMKProtoServerCertificateBuilder {
+        return SMKProtoServerCertificateBuilder(certificate: certificate, signature: signature)
     }
 
     @objc public class SMKProtoServerCertificateBuilder: NSObject {
 
         private var proto = SMKProtos_ServerCertificate()
 
-        @objc public override init() {}
+        @objc fileprivate override init() {}
 
-        // Initializer for required fields
-        @objc public init(certificate: Data, signature: Data) {
+        @objc fileprivate init(certificate: Data, signature: Data) {
             super.init()
 
             setCertificate(certificate)
@@ -222,18 +220,17 @@ extension SMKProtoServerCertificate.SMKProtoServerCertificateBuilder {
 
     // MARK: - SMKProtoSenderCertificateCertificateBuilder
 
-    @objc public class func builder() -> SMKProtoSenderCertificateCertificateBuilder {
-        return SMKProtoSenderCertificateCertificateBuilder()
+    @objc public class func builder(sender: String, senderDevice: UInt32, expires: UInt64, identityKey: Data, signer: SMKProtoServerCertificate) -> SMKProtoSenderCertificateCertificateBuilder {
+        return SMKProtoSenderCertificateCertificateBuilder(sender: sender, senderDevice: senderDevice, expires: expires, identityKey: identityKey, signer: signer)
     }
 
     @objc public class SMKProtoSenderCertificateCertificateBuilder: NSObject {
 
         private var proto = SMKProtos_SenderCertificate.Certificate()
 
-        @objc public override init() {}
+        @objc fileprivate override init() {}
 
-        // Initializer for required fields
-        @objc public init(sender: String, senderDevice: UInt32, expires: UInt64, identityKey: Data, signer: SMKProtoServerCertificate) {
+        @objc fileprivate init(sender: String, senderDevice: UInt32, expires: UInt64, identityKey: Data, signer: SMKProtoServerCertificate) {
             super.init()
 
             setSender(sender)
@@ -370,18 +367,17 @@ extension SMKProtoSenderCertificateCertificate.SMKProtoSenderCertificateCertific
 
     // MARK: - SMKProtoSenderCertificateBuilder
 
-    @objc public class func builder() -> SMKProtoSenderCertificateBuilder {
-        return SMKProtoSenderCertificateBuilder()
+    @objc public class func builder(certificate: Data, signature: Data) -> SMKProtoSenderCertificateBuilder {
+        return SMKProtoSenderCertificateBuilder(certificate: certificate, signature: signature)
     }
 
     @objc public class SMKProtoSenderCertificateBuilder: NSObject {
 
         private var proto = SMKProtos_SenderCertificate()
 
-        @objc public override init() {}
+        @objc fileprivate override init() {}
 
-        // Initializer for required fields
-        @objc public init(certificate: Data, signature: Data) {
+        @objc fileprivate init(certificate: Data, signature: Data) {
             super.init()
 
             setCertificate(certificate)
@@ -494,18 +490,17 @@ extension SMKProtoSenderCertificate.SMKProtoSenderCertificateBuilder {
 
     // MARK: - SMKProtoUnidentifiedSenderMessageMessageBuilder
 
-    @objc public class func builder() -> SMKProtoUnidentifiedSenderMessageMessageBuilder {
-        return SMKProtoUnidentifiedSenderMessageMessageBuilder()
+    @objc public class func builder(type: SMKProtoUnidentifiedSenderMessageMessageType, senderCertificate: SMKProtoSenderCertificate, content: Data) -> SMKProtoUnidentifiedSenderMessageMessageBuilder {
+        return SMKProtoUnidentifiedSenderMessageMessageBuilder(type: type, senderCertificate: senderCertificate, content: content)
     }
 
     @objc public class SMKProtoUnidentifiedSenderMessageMessageBuilder: NSObject {
 
         private var proto = SMKProtos_UnidentifiedSenderMessage.Message()
 
-        @objc public override init() {}
+        @objc fileprivate override init() {}
 
-        // Initializer for required fields
-        @objc public init(type: SMKProtoUnidentifiedSenderMessageMessageType, senderCertificate: SMKProtoSenderCertificate, content: Data) {
+        @objc fileprivate init(type: SMKProtoUnidentifiedSenderMessageMessageType, senderCertificate: SMKProtoSenderCertificate, content: Data) {
             super.init()
 
             setType(type)
@@ -612,18 +607,17 @@ extension SMKProtoUnidentifiedSenderMessageMessage.SMKProtoUnidentifiedSenderMes
 
     // MARK: - SMKProtoUnidentifiedSenderMessageBuilder
 
-    @objc public class func builder() -> SMKProtoUnidentifiedSenderMessageBuilder {
-        return SMKProtoUnidentifiedSenderMessageBuilder()
+    @objc public class func builder(ephemeralPublic: Data, encryptedStatic: Data, encryptedMessage: Data) -> SMKProtoUnidentifiedSenderMessageBuilder {
+        return SMKProtoUnidentifiedSenderMessageBuilder(ephemeralPublic: ephemeralPublic, encryptedStatic: encryptedStatic, encryptedMessage: encryptedMessage)
     }
 
     @objc public class SMKProtoUnidentifiedSenderMessageBuilder: NSObject {
 
         private var proto = SMKProtos_UnidentifiedSenderMessage()
 
-        @objc public override init() {}
+        @objc fileprivate override init() {}
 
-        // Initializer for required fields
-        @objc public init(ephemeralPublic: Data, encryptedStatic: Data, encryptedMessage: Data) {
+        @objc fileprivate init(ephemeralPublic: Data, encryptedStatic: Data, encryptedMessage: Data) {
             super.init()
 
             setEphemeralPublic(ephemeralPublic)

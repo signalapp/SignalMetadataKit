@@ -77,10 +77,9 @@ import Foundation
     }
 
     @objc public func toProto() throws -> SMKProtoUnidentifiedSenderMessage {
-        let builder = SMKProtoUnidentifiedSenderMessage.builder()
-        builder.setEphemeralPublic(ephemeralKey.serialized)
-        builder.setEncryptedStatic(encryptedStatic)
-        builder.setEncryptedMessage(encryptedMessage)
+        let builder = SMKProtoUnidentifiedSenderMessage.builder(ephemeralPublic: ephemeralKey.serialized,
+                                                                encryptedStatic: encryptedStatic,
+                                                                encryptedMessage: encryptedMessage)
         return try builder.build()
     }
 

@@ -2,13 +2,10 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 
-import XCTest
-import SignalMetadataKit
-
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/certificate/SenderCertificateTest.java
 //
 //public class SenderCertificateTest extends TestCase {
-class SMKSenderCertificateTest: XCTestCase {
+class SMKSenderCertificateTest: SignalBaseTest {
 
     override func setUp() {
         super.setUp()
@@ -44,11 +41,11 @@ class SMKSenderCertificateTest: XCTestCase {
         let expirationTimestamp: UInt64 = 31337
 
         let serverCertificate = getServerCertificate(serverKey: serverKey, trustRoot: trustRoot)
-        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder()
-        unsignedCertificateBuilder.setSender(senderRecipientId)
-        unsignedCertificateBuilder.setSenderDevice(senderDeviceId)
-        unsignedCertificateBuilder.setExpires(expirationTimestamp)
-        unsignedCertificateBuilder.setIdentityKey(try! key.ecPublicKey().serialized)
+        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
+                                                                                      senderDevice: senderDeviceId,
+                                                                                      expires: expirationTimestamp,
+                                                                                      identityKey: try! key.ecPublicKey().serialized,
+                                                                                      signer: try! serverCertificate.toProto())
         unsignedCertificateBuilder.setSigner(try! serverCertificate.toProto())
         let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
 
@@ -92,12 +89,11 @@ class SMKSenderCertificateTest: XCTestCase {
         let expirationTimestamp: UInt64 = 31337
 
         let serverCertificate = getServerCertificate(serverKey: serverKey, trustRoot: trustRoot)
-        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder()
-        unsignedCertificateBuilder.setSender(senderRecipientId)
-        unsignedCertificateBuilder.setSenderDevice(senderDeviceId)
-        unsignedCertificateBuilder.setExpires(expirationTimestamp)
-        unsignedCertificateBuilder.setIdentityKey(try! key.ecPublicKey().serialized)
-        unsignedCertificateBuilder.setSigner(try! serverCertificate.toProto())
+        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
+                                                                                      senderDevice: senderDeviceId,
+                                                                                      expires: expirationTimestamp,
+                                                                                      identityKey: try! key.ecPublicKey().serialized,
+                                                                                      signer: try! serverCertificate.toProto())
         let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
 
         //        byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
@@ -145,12 +141,11 @@ class SMKSenderCertificateTest: XCTestCase {
         let expirationTimestamp: UInt64 = 31337
 
         let serverCertificate = getServerCertificate(serverKey: serverKey, trustRoot: trustRoot)
-        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder()
-        unsignedCertificateBuilder.setSender(senderRecipientId)
-        unsignedCertificateBuilder.setSenderDevice(senderDeviceId)
-        unsignedCertificateBuilder.setExpires(expirationTimestamp)
-        unsignedCertificateBuilder.setIdentityKey(try! key.ecPublicKey().serialized)
-        unsignedCertificateBuilder.setSigner(try! serverCertificate.toProto())
+        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
+                                                                                      senderDevice: senderDeviceId,
+                                                                                      expires: expirationTimestamp,
+                                                                                      identityKey: try! key.ecPublicKey().serialized,
+                                                                                      signer: try! serverCertificate.toProto())
         let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
 
     //        byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
@@ -203,9 +198,8 @@ class SMKSenderCertificateTest: XCTestCase {
         //            .build()
         //            .toByteArray();
         let keyId: UInt32 = 1
-        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder()
-        unsignedServerCertificateBuilder.setId(keyId)
-        unsignedServerCertificateBuilder.setKey(try! serverKey.ecPublicKey().serialized)
+        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId,
+                                                                                            key: try! serverKey.ecPublicKey().serialized)
         let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
 
         //        byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);

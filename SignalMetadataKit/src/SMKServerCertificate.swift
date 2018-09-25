@@ -36,14 +36,11 @@ import Foundation
     }
 
     @objc public func toProto() throws -> SMKProtoServerCertificate {
-        let certificateBuilder = SMKProtoServerCertificateCertificate.builder()
-        certificateBuilder.setId(keyId)
-        certificateBuilder.setKey(key.serialized)
+        let certificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId, key: key.serialized)
 
         let builder =
-            SMKProtoServerCertificate.builder()
-        builder.setCertificate(try certificateBuilder.buildSerializedData())
-        builder.setSignature(signatureData)
+            SMKProtoServerCertificate.builder(certificate: try certificateBuilder.buildSerializedData(),
+                                              signature: signatureData)
         return try builder.build()
     }
 

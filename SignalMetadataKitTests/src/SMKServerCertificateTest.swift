@@ -2,14 +2,12 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 
-import XCTest
 import SwiftProtobuf
-import SignalMetadataKit
 
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/certificate/ServerCertificateTest.java
 //
 // public class ServerCertificateTest extends TestCase {
-class SMKServerCertificateTest: XCTestCase {
+class SMKServerCertificateTest: SignalBaseTest {
 
     override func setUp() {
         super.setUp()
@@ -65,9 +63,8 @@ class SMKServerCertificateTest: XCTestCase {
 //    .setKey(ByteString.copyFrom(keyPair.getPublicKey().serialize()))
 //    .build();
         let keyId: UInt32 = 1
-        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder()
-        unsignedServerCertificateBuilder.setId(keyId)
-        unsignedServerCertificateBuilder.setKey(try! keyPair.ecPublicKey().serialized)
+        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId,
+                                                                                            key: try! keyPair.ecPublicKey().serialized)
 
         //    byte[] certificateBytes     = certificate.toByteArray();
         let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
@@ -102,9 +99,8 @@ class SMKServerCertificateTest: XCTestCase {
 //    .setKey(ByteString.copyFrom(keyPair.getPublicKey().serialize()))
 //    .build();
         let keyId: UInt32 = 1
-        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder()
-        unsignedServerCertificateBuilder.setId(keyId)
-        unsignedServerCertificateBuilder.setKey(try! keyPair.ecPublicKey().serialized)
+        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId,
+                                                                                            key: try! keyPair.ecPublicKey().serialized)
 
 //    byte[] certificateBytes     = certificate.toByteArray();
         let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
@@ -164,9 +160,7 @@ class SMKServerCertificateTest: XCTestCase {
 //    .setSignature(ByteString.copyFrom(certificateSignature))
 //    .build().toByteArray();
                 let builder =
-                    SMKProtoServerCertificate.builder()
-                builder.setCertificate(badCertificate)
-                builder.setSignature(serverCertificateSignature)
+                    SMKProtoServerCertificate.builder(certificate: badCertificate, signature: serverCertificateSignature)
                 let serializedData = try! builder.buildSerializedData()
                 let parsed: SMKServerCertificate
                 do {

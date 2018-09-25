@@ -2,12 +2,9 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 
-import XCTest
-import SignalMetadataKit
-
 // https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/SecretSessionCipherTest.java
 //    public class SecretSessionCipherTest extends TestCase {
-class SMKSecretSessionCipherTest: XCTestCase {
+class SMKSecretSessionCipherTest: SignalBaseTest {
 
     override func setUp() {
         super.setUp()
@@ -124,10 +121,9 @@ class SMKSecretSessionCipherTest: XCTestCase {
                                           timestamp: 31335,
                                           protocolContext: nil)
             XCTFail("Decryption should have failed.")
-        } catch _ as SMKCertificateError {
-            // Decryption is expected to fail.
         } catch {
-            XCTFail("Unexpected error: \(error)")
+            // Decryption is expected to fail.
+            XCTAssertTrue(error is SMKError)
         }
     }
 
@@ -181,10 +177,9 @@ class SMKSecretSessionCipherTest: XCTestCase {
                                           timestamp: 31338,
                                           protocolContext: nil)
             XCTFail("Decryption should have failed.")
-        } catch _ as SMKCertificateError {
-            // Decryption is expected to fail.
         } catch {
-            XCTFail("Unexpected error: \(error)")
+            // Decryption is expected to fail.
+            XCTAssertTrue(error is SMKError)
         }
     }
 
@@ -263,9 +258,8 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    .build()
 //    .toByteArray();
         let keyId: UInt32 = 1
-        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder()
-        unsignedServerCertificateBuilder.setId(keyId)
-        unsignedServerCertificateBuilder.setKey(try! serverKey.ecPublicKey().serialized)
+        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId,
+                                                                                            key: try! serverKey.ecPublicKey().serialized)
         let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
 
 //    byte[] serverCertificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), serverCertificateBytes);
@@ -290,12 +284,11 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    .setSigner(SignalProtos.ServerCertificate.parseFrom(serverCertificate.getSerialized()))
 //    .build()
 //    .toByteArray();
-        let unsignedSenderCertificateBuilder = SMKProtoSenderCertificateCertificate.builder()
-        unsignedSenderCertificateBuilder.setSender(senderRecipientId)
-        unsignedSenderCertificateBuilder.setSenderDevice(senderDeviceId)
-        unsignedSenderCertificateBuilder.setExpires(expirationTimestamp)
-        unsignedSenderCertificateBuilder.setIdentityKey(identityKey.serialized)
-        unsignedSenderCertificateBuilder.setSigner(try! signedServerCertificate.toProto())
+        let unsignedSenderCertificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
+                                                                                            senderDevice: senderDeviceId,
+                                                                                            expires: expirationTimestamp,
+                                                                                            identityKey: identityKey.serialized,
+                                                                                            signer: try! signedServerCertificate.toProto())
         let unsignedSenderCertificateData = try! unsignedSenderCertificateBuilder.build().serializedData()
 
 //    byte[] senderCertificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), senderCertificateBytes);

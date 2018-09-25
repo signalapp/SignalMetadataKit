@@ -53,17 +53,15 @@ import Foundation
     }
 
     @objc public func toProto() throws -> SMKProtoSenderCertificate {
-        let certificateBuilder = SMKProtoSenderCertificateCertificate.builder()
-        certificateBuilder.setSender(senderRecipientId)
-        certificateBuilder.setSenderDevice(senderDeviceId)
-        certificateBuilder.setExpires(expirationTimestamp)
-        certificateBuilder.setIdentityKey(key.serialized)
-        certificateBuilder.setSigner(try signer.toProto())
+        let certificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
+                                                                              senderDevice: senderDeviceId,
+                                                                              expires: expirationTimestamp,
+                                                                              identityKey: key.serialized,
+                                                                              signer: try signer.toProto())
 
         let builder =
-            SMKProtoSenderCertificate.builder()
-        builder.setCertificate(try certificateBuilder.buildSerializedData())
-        builder.setSignature(signatureData)
+            SMKProtoSenderCertificate.builder(certificate: try certificateBuilder.buildSerializedData(),
+                                              signature: signatureData)
         return try builder.build()
     }
 

@@ -79,9 +79,8 @@ public enum SMKCertificateError: Error {
 //    if (!Curve.verifySignature(trustRoot, certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");
 //    }
-        let certificateBuilder = SMKProtoServerCertificateCertificate.builder()
-        certificateBuilder.setId(serverCertificate.keyId)
-        certificateBuilder.setKey(serverCertificate.key.serialized)
+        let certificateBuilder = SMKProtoServerCertificateCertificate.builder(id: serverCertificate.keyId,
+                                                                              key: serverCertificate.key.serialized)
         let certificateData = try certificateBuilder.build().serializedData()
 
 //            let certificateData = try serverCertificate.toProto().certificate
