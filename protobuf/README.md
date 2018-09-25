@@ -1,6 +1,6 @@
 # SignalServiceKit Protobufs
 
-These protobuf definitions are copied from Signal-Android, but modified
+These protobuf definitions are copied from libsignal-metadata-java, but modified
 to match some iOS conventions.
 
 ## Prequisites
@@ -17,6 +17,7 @@ files.
 
 ## Building Protobuf
 
-    cd ~/src/WhisperSystems/SignalServiceKit/protobuf
+    // Make sure that Signal-iOS is checked out alongside this repo, at the path: [repo root]/../Signal-iOS
+    cd [repo root]/protobuf
     make
 

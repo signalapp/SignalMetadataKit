@@ -333,7 +333,7 @@ private class SMKStaticKeys: NSObject {
             throw SMKError.assertionError(description: "\(logTag) derived ephemeral has unexpected length: \(ephemeralDerived.count).")
         }
 
-        let ephemeralDerivedParser = DataParser(data: ephemeralDerived)
+        let ephemeralDerivedParser = OWSDataParser(data: ephemeralDerived)
         let chainKey = try ephemeralDerivedParser.nextData(length: 32, name: "chain key")
         let cipherKey = try ephemeralDerivedParser.nextData(length: 32, name: "cipher key")
         let macKey = try ephemeralDerivedParser.nextData(length: 32, name: "mac key")
@@ -374,7 +374,7 @@ private class SMKStaticKeys: NSObject {
         }
 
         // byte[][] staticDerivedParts = ByteUtil.split(staticDerived, 32, 32, 32);
-        let staticDerivedParser = DataParser(data: staticDerived)
+        let staticDerivedParser = OWSDataParser(data: staticDerived)
         _ = try staticDerivedParser.nextData(length: 32)
         let cipherKey = try staticDerivedParser.nextData(length: 32)
         let macKey = try staticDerivedParser.nextData(length: 32)
@@ -480,7 +480,7 @@ private class SMKStaticKeys: NSObject {
         }
 
         // byte[][] ciphertextParts = ByteUtil.split(ciphertext, ciphertext.count - 10, 10);
-        let cipherTextWithMacParser = DataParser(data: cipherTextWithMac)
+        let cipherTextWithMacParser = OWSDataParser(data: cipherTextWithMac)
         let cipherTextLength = UInt(cipherTextWithMac.count) - kSMKSecretSessionCipherMacLength
         let cipherText = try cipherTextWithMacParser.nextData(length: cipherTextLength, name: "cipher text")
         let theirMac = try cipherTextWithMacParser.nextData(length: kSMKSecretSessionCipherMacLength, name: "their mac")

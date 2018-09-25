@@ -2,10 +2,13 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 
+import XCTest
+import SignalMetadataKit
+
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/certificate/SenderCertificateTest.java
 //
 //public class SenderCertificateTest extends TestCase {
-class SMKSenderCertificateTest: SignalBaseTest {
+class SMKSenderCertificateTest: XCTestCase {
 
     override func setUp() {
         super.setUp()

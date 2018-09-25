@@ -37,7 +37,7 @@ import Foundation
         // public UnidentifiedSenderMessage(byte[] serialized)
         // throws InvalidMetadataMessageException, InvalidMetadataVersionException
 
-        let parser = DataParser(data: dataAndPrefix)
+        let parser = OWSDataParser(data: dataAndPrefix)
 
         // this.version = ByteUtil.highBitsToInt(serialized[0]);
         let versionByte = try parser.nextByte(name: "version byte")

@@ -2,9 +2,12 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 
+import XCTest
+import SignalMetadataKit
+
 // https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/SecretSessionCipherTest.java
 //    public class SecretSessionCipherTest extends TestCase {
-class SMKSecretSessionCipherTest: SignalBaseTest {
+class SMKSecretSessionCipherTest: XCTestCase {
 
     override func setUp() {
         super.setUp()
@@ -121,9 +124,10 @@ class SMKSecretSessionCipherTest: SignalBaseTest {
                                           timestamp: 31335,
                                           protocolContext: nil)
             XCTFail("Decryption should have failed.")
-        } catch {
+        } catch _ as SMKCertificateError {
             // Decryption is expected to fail.
-            XCTAssertTrue(error is SMKError)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
         }
     }
 
@@ -177,9 +181,10 @@ class SMKSecretSessionCipherTest: SignalBaseTest {
                                           timestamp: 31338,
                                           protocolContext: nil)
             XCTFail("Decryption should have failed.")
-        } catch {
+        } catch _ as SMKCertificateError {
             // Decryption is expected to fail.
-            XCTAssertTrue(error is SMKError)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
         }
     }
 
