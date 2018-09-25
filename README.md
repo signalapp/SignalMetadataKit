@@ -1,0 +1,1 @@
+# SignalMetadataKit-Private
