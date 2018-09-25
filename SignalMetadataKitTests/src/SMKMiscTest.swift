@@ -2,7 +2,10 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 
-class SMKTest: SignalBaseTest {
+import XCTest
+import SignalMetadataKit
+
+class SMKTest: XCTestCase {
 
     override func setUp() {
         super.setUp()

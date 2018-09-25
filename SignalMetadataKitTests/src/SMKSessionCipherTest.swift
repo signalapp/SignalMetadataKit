@@ -2,6 +2,9 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 
+import XCTest
+import SignalMetadataKit
+
 extension MutableCollection {
     /// Shuffles the contents of this collection.
     mutating func ows_shuffle() {
@@ -28,7 +31,7 @@ extension Sequence {
 
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/SessionCipherTest.java
 //    public class SessionCipherTest extends TestCase {
-class SMKSessionCipherTest: SignalBaseTest {
+class SMKSessionCipherTest: XCTestCase {
 
     override func setUp() {
         super.setUp()

@@ -2,12 +2,14 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 
+import XCTest
 import SwiftProtobuf
+import SignalMetadataKit
 
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/certificate/ServerCertificateTest.java
 //
 // public class ServerCertificateTest extends TestCase {
-class SMKServerCertificateTest: SignalBaseTest {
+class SMKServerCertificateTest: XCTestCase {
 
     override func setUp() {
         super.setUp()
