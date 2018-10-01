@@ -14,7 +14,7 @@ public class SMKUDAccessKey: NSObject {
     @objc public let keyData: Data
 
     public init(profileKey: Data) throws {
-        guard let aesGcmKey = OWSAES256Key(dataIfValid: profileKey) else {
+        guard let aesGcmKey = OWSAES256Key(data: profileKey) else {
             throw SMKError.assertionError(description: "Profile key is not valid AES GCM key.")
         }
 
