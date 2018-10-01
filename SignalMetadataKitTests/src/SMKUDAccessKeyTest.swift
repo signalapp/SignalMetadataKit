@@ -5,7 +5,7 @@
 import XCTest
 import SignalMetadataKit
 
-class SMKUtilsTest: XCTestCase {
+class SMKUDAccessKeyTest: XCTestCase {
 
     override func setUp() {
         super.setUp()
@@ -19,17 +19,17 @@ class SMKUtilsTest: XCTestCase {
 
     func testUDAccessKeyForProfileKey() {
         let profileKey = Data(count: Int(kAES256_KeyByteLength))
-        let udAccessKey1 = try! SMKUtils.udAccessKeyForProfileKey(profileKey: profileKey)
-        XCTAssertEqual(udAccessKey1.count, SMKUtils.kUDAccessKeyLength)
+        let udAccessKey1 = try! SMKUDAccessKey(profileKey: profileKey)
+        XCTAssertEqual(udAccessKey1.keyData.count, SMKUDAccessKey.kUDAccessKeyLength)
 
-        let udAccessKey2 = try! SMKUtils.udAccessKeyForProfileKey(profileKey: profileKey)
-        XCTAssertEqual(udAccessKey2.count, SMKUtils.kUDAccessKeyLength)
+        let udAccessKey2 = try! SMKUDAccessKey(profileKey: profileKey)
+        XCTAssertEqual(udAccessKey2.keyData.count, SMKUDAccessKey.kUDAccessKeyLength)
 
         XCTAssertEqual(udAccessKey1, udAccessKey2)
     }
 
     func testUDAccessKeyForProfileKey_badProfileKey() {
         let profileKey = Data(count: Int(kAES256_KeyByteLength - 1))
-        XCTAssertThrowsError(try SMKUtils.udAccessKeyForProfileKey(profileKey: profileKey))
+        XCTAssertThrowsError(try SMKUDAccessKey(profileKey: profileKey))
     }
 }
