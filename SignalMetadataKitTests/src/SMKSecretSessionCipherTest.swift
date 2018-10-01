@@ -332,10 +332,10 @@ class SMKSecretSessionCipherTest: XCTestCase {
                                            deviceId: bobMockClient.deviceId,
                                            preKeyId: bobPreKey.id,
                                            preKeyPublic: try! bobPreKey.keyPair.ecPublicKey().serialized,
-                                           signedPreKeyPublic: try! bobSignedPreKey.keyPair.ecPublicKey().serialized,
+                                           signedPreKeyPublic: try! bobSignedPreKey.keyPair.ecPublicKey().keyData,
                                            signedPreKeyId: bobSignedPreKey.id,
                                            signedPreKeySignature: bobSignedPreKey.signature,
-                                           identityKey: try! bobIdentityKey.ecPublicKey().serialized)!
+                                           identityKey: try! bobIdentityKey.ecPublicKey().keyData)!
 
 //    SessionBuilder aliceSessionBuilder = new SessionBuilder(aliceStore, new SignalProtocolAddress("+14152222222", 1));
         let aliceSessionBuilder = aliceMockClient.createSessionBuilder(forRecipient: bobMockClient)
