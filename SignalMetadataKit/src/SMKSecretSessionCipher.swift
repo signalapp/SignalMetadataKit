@@ -230,6 +230,7 @@ public class SMKDecryptResult: NSObject {
     // ProtocolNoSessionException, ProtocolLegacyMessageException,
     // ProtocolInvalidVersionException, ProtocolDuplicateMessageException,
     // ProtocolInvalidKeyIdException, ProtocolUntrustedIdentityException
+    @objc
     public func decryptMessage(certificateValidator: SMKCertificateValidator,
                                cipherTextData: Data,
                                timestamp: UInt64,
