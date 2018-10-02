@@ -8,9 +8,11 @@ import Foundation
 // https://github.com/signalapp/libsignal-protocol-java/blob/87fae0f98332e98a32bbb82515428b4edeb4181f/java/src/main/java/org/whispersystems/libsignal/ecc/ECPrivateKey.java
 @objc public class ECPrivateKey: NSObject {
 
-    @objc public let keyData: Data
+    @objc
+    public let keyData: Data
 
-    @objc public init(keyData: Data) throws {
+    @objc
+    public init(keyData: Data) throws {
         guard keyData.count == ECCKeyLength else {
             throw SMKError.assertionError(description: "\(ECPrivateKey.logTag) key has invalid length")
         }

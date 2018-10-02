@@ -73,6 +73,24 @@ private class SMKStaticKeys: NSObject {
 
 // MARK: -
 
+@objc
+public class SMKDecryptResult: NSObject {
+
+    @objc public let senderRecipientId: String
+    @objc public let senderDeviceId: Int
+    @objc public let paddedPayload: Data
+
+    init(senderRecipientId: String,
+         senderDeviceId: Int,
+         paddedPayload: Data) {
+        self.senderRecipientId = senderRecipientId
+        self.senderDeviceId = senderDeviceId
+        self.paddedPayload = paddedPayload
+    }
+}
+
+// MARK: -
+
 @objc public class SMKSecretSessionCipher: NSObject {
 
     private let kUDPrefixString = "UnidentifiedDelivery"
@@ -100,11 +118,12 @@ private class SMKStaticKeys: NSObject {
 
     // public byte[] encrypt(SignalProtocolAddress destinationAddress, SenderCertificate senderCertificate, byte[]
     // paddedPlaintext)
-    @objc public func encryptMessage(recipientId: String,
-                                     deviceId: Int32,
-                                     paddedPlaintext: Data,
-                                     senderCertificate: SMKSenderCertificate,
-                                     protocolContext: Any?) throws -> Data {
+    @objc
+    public func encryptMessage(recipientId: String,
+                               deviceId: Int32,
+                               paddedPlaintext: Data,
+                               senderCertificate: SMKSenderCertificate,
+                               protocolContext: Any?) throws -> Data {
         guard recipientId.count > 0 else {
             throw SMKError.assertionError(description: "\(SMKSecretSessionCipher.logTag) invalid recipientId")
         }
@@ -214,9 +233,7 @@ private class SMKStaticKeys: NSObject {
     public func decryptMessage(certificateValidator: SMKCertificateValidator,
                                cipherTextData: Data,
                                timestamp: UInt64,
-                               protocolContext: Any?) throws -> (senderRecipientId: String,
-        senderDeviceId: Int,
-        paddedPayload: Data) {
+                               protocolContext: Any?) throws -> SMKDecryptResult {
 
             guard timestamp > 0 else {
                 throw SMKError.assertionError(description: "\(logTag) invalid timestamp")
@@ -299,7 +316,7 @@ private class SMKStaticKeys: NSObject {
             guard senderDeviceId >= 0 && senderDeviceId <= INT_MAX else {
                 throw SMKError.assertionError(description: "\(logTag) Invalid senderDeviceId.")
             }
-            return (senderRecipientId: senderRecipientId, senderDeviceId: Int(senderDeviceId), paddedPayload: paddedMessagePlaintext)
+            return SMKDecryptResult(senderRecipientId: senderRecipientId, senderDeviceId: Int(senderDeviceId), paddedPayload: paddedMessagePlaintext)
     }
 
     // MARK: - Encrypt

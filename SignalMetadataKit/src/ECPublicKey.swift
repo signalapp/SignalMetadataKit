@@ -8,9 +8,11 @@ import Foundation
 // https://github.com/signalapp/libsignal-protocol-java/blob/87fae0f98332e98a32bbb82515428b4edeb4181f/java/src/main/java/org/whispersystems/libsignal/ecc/DjbECPublicKey.java
 @objc public class ECPublicKey: NSObject {
 
+    @objc
     public static let keyTypeDJB: UInt8 = 0x05
 
-    @objc public let keyData: Data
+    @objc
+    public let keyData: Data
 
     @objc
     public init(keyData: Data) throws {
