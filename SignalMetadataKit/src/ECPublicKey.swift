@@ -12,6 +12,7 @@ import Foundation
 
     @objc public let keyData: Data
 
+    @objc
     public init(keyData: Data) throws {
         guard keyData.count == ECCKeyLength else {
             throw SMKError.assertionError(description: "\(ECPublicKey.logTag) key has invalid length")
