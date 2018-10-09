@@ -4,6 +4,10 @@
 
 import Foundation
 
+public enum SMKSelfSentMessageError: Error {
+    case error()
+}
+
 // See:
 // https://github.com/signalapp/libsignal-metadata-java/blob/master/java/src/main/java/org/signal/libsignal/metadata/SecretSessionCipher.java
 
@@ -237,6 +241,8 @@ public class SMKDecryptResult: NSObject {
     public func decryptMessage(certificateValidator: SMKCertificateValidator,
                                cipherTextData: Data,
                                timestamp: UInt64,
+                               localRecipientId: String,
+                               localDeviceId: Int32,
                                protocolContext: Any?) throws -> SMKDecryptResult {
 
             guard timestamp > 0 else {
@@ -294,6 +300,12 @@ public class SMKDecryptResult: NSObject {
 
             // content = new UnidentifiedSenderMessageContent(messageBytes);
             let messageContent = try SMKUnidentifiedSenderMessageContent.parse(data: messageBytes)
+
+            guard messageContent.senderCertificate.senderRecipientId != localRecipientId ||
+                  messageContent.senderCertificate.senderDeviceId != localDeviceId else {
+                Logger.info("Discarding self-sent message")
+                throw SMKSelfSentMessageError.error()
+            }
 
             // validator.validate(content.getSenderCertificate(), timestamp);
             try certificateValidator.validate(senderCertificate: messageContent.senderCertificate,
