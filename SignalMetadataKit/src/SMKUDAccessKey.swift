@@ -37,6 +37,11 @@ public class SMKUDAccessKey: NSObject {
         self.keyData = keyData.ciphertext
     }
 
+    @objc
+    public init(randomKeyData: ()) {
+        self.keyData = Randomness.generateRandomBytes(Int32(SMKUDAccessKey.kUDAccessKeyLength))
+    }
+
     // MARK: 
     
     override public func isEqual(_ object: Any?) -> Bool {
