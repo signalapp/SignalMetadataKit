@@ -62,6 +62,8 @@ class SMKSecretSessionCipherTest: XCTestCase {
         let bobPlaintext = try! bobCipher.decryptMessage(certificateValidator: certificateValidator,
                                                  cipherTextData: ciphertext,
                                                  timestamp: 31335,
+                                                 localRecipientId: bobMockClient.recipientId,
+                                                 localDeviceId: bobMockClient.deviceId,
                                                  protocolContext: nil)
 
 //    assertEquals(new String(plaintext.second()), "smert za smert");
@@ -122,6 +124,8 @@ class SMKSecretSessionCipherTest: XCTestCase {
             try bobCipher.decryptMessage(certificateValidator: certificateValidator,
                                           cipherTextData: ciphertext,
                                           timestamp: 31335,
+                                          localRecipientId: bobMockClient.recipientId,
+                                          localDeviceId: bobMockClient.deviceId,
                                           protocolContext: nil)
             XCTFail("Decryption should have failed.")
         } catch _ as SMKCertificateError {
@@ -179,6 +183,8 @@ class SMKSecretSessionCipherTest: XCTestCase {
             try bobCipher.decryptMessage(certificateValidator: certificateValidator,
                                           cipherTextData: ciphertext,
                                           timestamp: 31338,
+                                          localRecipientId: bobMockClient.recipientId,
+                                          localDeviceId: bobMockClient.deviceId,
                                           protocolContext: nil)
             XCTFail("Decryption should have failed.")
         } catch _ as SMKCertificateError {
@@ -237,6 +243,8 @@ class SMKSecretSessionCipherTest: XCTestCase {
             try bobCipher.decryptMessage(certificateValidator: certificateValidator,
                                          cipherTextData: ciphertext,
                                          timestamp: 31335,
+                                         localRecipientId: bobMockClient.recipientId,
+                                         localDeviceId: bobMockClient.deviceId,
                                          protocolContext: nil)
             XCTFail("Decryption should have failed.")
         } catch {
@@ -332,10 +340,10 @@ class SMKSecretSessionCipherTest: XCTestCase {
                                            deviceId: bobMockClient.deviceId,
                                            preKeyId: bobPreKey.id,
                                            preKeyPublic: try! bobPreKey.keyPair.ecPublicKey().serialized,
-                                           signedPreKeyPublic: try! bobSignedPreKey.keyPair.ecPublicKey().keyData,
+                                           signedPreKeyPublic: try! bobSignedPreKey.keyPair.ecPublicKey().keyData.prependKeyType,
                                            signedPreKeyId: bobSignedPreKey.id,
                                            signedPreKeySignature: bobSignedPreKey.signature,
-                                           identityKey: try! bobIdentityKey.ecPublicKey().keyData)!
+                                           identityKey: try! bobIdentityKey.ecPublicKey().keyData.prependKeyType)!
 
 //    SessionBuilder aliceSessionBuilder = new SessionBuilder(aliceStore, new SignalProtocolAddress("+14152222222", 1));
         let aliceSessionBuilder = aliceMockClient.createSessionBuilder(forRecipient: bobMockClient)
