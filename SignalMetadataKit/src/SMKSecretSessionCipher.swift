@@ -4,8 +4,9 @@
 
 import Foundation
 
-public enum SMKSelfSentMessageError: Error {
-    case error()
+@objc
+public enum SMKSecretSessionCipherError: Int, Error {
+    case selfSentMessage
 }
 
 // See:
@@ -304,7 +305,7 @@ public class SMKDecryptResult: NSObject {
             guard messageContent.senderCertificate.senderRecipientId != localRecipientId ||
                   messageContent.senderCertificate.senderDeviceId != localDeviceId else {
                 Logger.info("Discarding self-sent message")
-                throw SMKSelfSentMessageError.error()
+                throw SMKSecretSessionCipherError.selfSentMessage
             }
 
             // validator.validate(content.getSenderCertificate(), timestamp);

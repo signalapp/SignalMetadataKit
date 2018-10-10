@@ -160,7 +160,10 @@ class SMKTest: XCTestCase {
         let messageTimestamp = NSDate.ows_millisecondTimeStamp()
 
         let bobToAliceCipher = try! bobMockClient.createSecretSessionCipher()
-        let decryptedMessage = try! bobToAliceCipher.decryptMessage(certificateValidator: certificateValidator, cipherTextData: encryptedMessage, timestamp: messageTimestamp, protocolContext: nil)
+        let decryptedMessage = try! bobToAliceCipher.decryptMessage(certificateValidator: certificateValidator, cipherTextData: encryptedMessage, timestamp: messageTimestamp,
+                                                                    localRecipientId: bobMockClient.recipientId,
+                                                                    localDeviceId: bobMockClient.deviceId,
+                                                                    protocolContext: nil)
         let payload = (decryptedMessage.paddedPayload as NSData).removePadding()
 
         XCTAssertEqual(aliceMockClient.recipientId, decryptedMessage.senderRecipientId)

@@ -36,4 +36,11 @@ public class SMKUDAccessKey: NSObject {
 
         self.keyData = keyData.ciphertext
     }
+
+    // MARK: 
+    
+    override public func isEqual(_ object: Any?) -> Bool {
+        guard let other = object as? SMKUDAccessKey else { return false }
+        return self.keyData == other.keyData
+    }
 }
