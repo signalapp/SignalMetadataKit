@@ -127,11 +127,11 @@ public class SMKDecryptResult: NSObject {
     // public byte[] encrypt(SignalProtocolAddress destinationAddress, SenderCertificate senderCertificate, byte[]
     // paddedPlaintext)
     @objc
-    public func encryptMessage(recipientId: String,
-                               deviceId: Int32,
-                               paddedPlaintext: Data,
-                               senderCertificate: SMKSenderCertificate,
-                               protocolContext: Any?) throws -> Data {
+    public func trywrapped_encryptMessage(recipientId: String,
+                                          deviceId: Int32,
+                                          paddedPlaintext: Data,
+                                          senderCertificate: SMKSenderCertificate,
+                                          protocolContext: Any?) throws -> Data {
         guard recipientId.count > 0 else {
             throw SMKError.assertionError(description: "\(SMKSecretSessionCipher.logTag) invalid recipientId")
         }
@@ -148,8 +148,7 @@ public class SMKDecryptResult: NSObject {
                                    deviceId: deviceId)
 
         // CiphertextMessage message = new SessionCipher(signalProtocolStore, destinationAddress).encrypt(paddedPlaintext);
-        let encryptedMessage = cipher.encryptMessage(paddedPlaintext,
-                                                     protocolContext: protocolContext)
+        let encryptedMessage = try cipher.encryptMessage(paddedPlaintext, protocolContext: protocolContext)
 
         guard let encryptedMessageData = encryptedMessage.serialized() else {
             throw SMKError.assertionError(description: "\(logTag) Could not serialize encrypted message.")
@@ -239,12 +238,12 @@ public class SMKDecryptResult: NSObject {
     // ProtocolInvalidVersionException, ProtocolDuplicateMessageException,
     // ProtocolInvalidKeyIdException, ProtocolUntrustedIdentityException
     @objc
-    public func decryptMessage(certificateValidator: SMKCertificateValidator,
-                               cipherTextData: Data,
-                               timestamp: UInt64,
-                               localRecipientId: String,
-                               localDeviceId: Int32,
-                               protocolContext: Any?) throws -> SMKDecryptResult {
+    public func trywrapped_decryptMessage(certificateValidator: SMKCertificateValidator,
+                                          cipherTextData: Data,
+                                          timestamp: UInt64,
+                                          localRecipientId: String,
+                                          localDeviceId: Int32,
+                                          protocolContext: Any?) throws -> SMKDecryptResult {
 
             guard timestamp > 0 else {
                 throw SMKError.assertionError(description: "\(logTag) invalid timestamp")
@@ -321,7 +320,7 @@ public class SMKDecryptResult: NSObject {
                 throw SMKError.assertionError(description: "\(logTag) Sender's certificate key does not match key used in message.")
             }
 
-            let paddedMessagePlaintext = try decrypt(messageContent: messageContent, protocolContext: protocolContext)
+            let paddedMessagePlaintext = try trywrapped_decrypt(messageContent: messageContent, protocolContext: protocolContext)
 
             // return new Pair<>(new SignalProtocolAddress(content.getSenderCertificate().getSender(),
             // content.getSenderCertificate().getSenderDeviceId()),
@@ -466,8 +465,8 @@ public class SMKDecryptResult: NSObject {
     // private byte[] decrypt(UnidentifiedSenderMessageContent message)
     // throws InvalidVersionException, InvalidMessageException, InvalidKeyException, DuplicateMessageException,
     // InvalidKeyIdException, UntrustedIdentityException, LegacyMessageException, NoSessionException
-    private func decrypt(messageContent: SMKUnidentifiedSenderMessageContent,
-                         protocolContext: Any?) throws -> Data {
+    private func trywrapped_decrypt(messageContent: SMKUnidentifiedSenderMessageContent,
+                                    protocolContext: Any?) throws -> Data {
 
         // SignalProtocolAddress sender = new SignalProtocolAddress(message.getSenderCertificate().getSender(),
         // message.getSenderCertificate().getSenderDeviceId());
@@ -500,7 +499,7 @@ public class SMKDecryptResult: NSObject {
                                    recipientId: senderRecipientId,
                                    deviceId: Int32(senderDeviceId))
 
-        let plaintextData = cipher.decrypt(cipherMessage, protocolContext: protocolContext)
+        let plaintextData = try cipher.decrypt(cipherMessage, protocolContext: protocolContext)
         return plaintextData
     }
 
