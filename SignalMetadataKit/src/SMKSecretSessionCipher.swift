@@ -487,7 +487,7 @@ public class SMKDecryptResult: NSObject {
         var cipherMessage: CipherMessage
         switch (messageContent.messageType) {
         case .whisper:
-            cipherMessage = WhisperMessage(data: messageContent.contentData)
+            cipherMessage = try WhisperMessage(data: messageContent.contentData)
         case .prekey:
             cipherMessage = try PreKeyWhisperMessage(data: messageContent.contentData)
         }
