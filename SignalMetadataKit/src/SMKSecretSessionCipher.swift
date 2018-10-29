@@ -489,7 +489,7 @@ public class SMKDecryptResult: NSObject {
         case .whisper:
             cipherMessage = WhisperMessage(data: messageContent.contentData)
         case .prekey:
-            cipherMessage = PreKeyWhisperMessage(data: messageContent.contentData)
+            cipherMessage = try PreKeyWhisperMessage(data: messageContent.contentData)
         }
 
         let cipher = SessionCipher(sessionStore: sessionStore,
