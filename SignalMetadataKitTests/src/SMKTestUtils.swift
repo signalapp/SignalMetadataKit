@@ -7,11 +7,11 @@ import SignalMetadataKit
 
 class MockCertificateValidator: NSObject, SMKCertificateValidator {
 
-    @objc public func trywrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws {
+    @objc public func throwswrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws {
         // Do not throw
     }
 
-    @objc public func trywrapped_validate(serverCertificate: SMKServerCertificate) throws {
+    @objc public func throwswrapped_validate(serverCertificate: SMKServerCertificate) throws {
         // Do not throw
     }
 }

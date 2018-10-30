@@ -86,7 +86,7 @@ class SMKServerCertificateTest: XCTestCase {
 
 //    new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
         let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-        try! certificateValidator.trywrapped_validate(serverCertificate: parsed)
+        try! certificateValidator.throwswrapped_validate(serverCertificate: parsed)
     }
 
 //    public void testBadSignature() throws Exception {
@@ -140,7 +140,7 @@ class SMKServerCertificateTest: XCTestCase {
 //    // good
 //    }
                 let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.trywrapped_validate(serverCertificate: parsed))
+                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: parsed))
             }
         }
 
@@ -192,7 +192,7 @@ class SMKServerCertificateTest: XCTestCase {
 //    }
                 //    }
                 let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.trywrapped_validate(serverCertificate: parsed))
+                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: parsed))
             }
         }
     }

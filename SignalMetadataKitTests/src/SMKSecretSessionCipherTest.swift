@@ -48,7 +48,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    senderCertificate, "smert za smert".getBytes());
         // NOTE: The java tests don't bother padding the plaintext.
         let alicePlaintext = "smert za smert".data(using: String.Encoding.utf8)!
-        let ciphertext = try! aliceCipher.trywrapped_encryptMessage(recipientId: bobMockClient.recipientId,
+        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.recipientId,
                                                                     deviceId: bobMockClient.deviceId,
                                                                     paddedPlaintext: alicePlaintext,
                                                                     senderCertificate: senderCertificate,
@@ -59,7 +59,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
 
 //    Pair<SignalProtocolAddress, byte[]> plaintext = bobCipher.decrypt(new CertificateValidator(trustRoot.getPublicKey()), ciphertext, 31335);
         let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-        let bobPlaintext = try! bobCipher.trywrapped_decryptMessage(certificateValidator: certificateValidator,
+        let bobPlaintext = try! bobCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
                                                                     cipherTextData: ciphertext,
                                                                     timestamp: 31335,
                                                                     localRecipientId: bobMockClient.recipientId,
@@ -104,7 +104,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    senderCertificate, "и вот я".getBytes());
         // NOTE: The java tests don't bother padding the plaintext.
         let alicePlaintext = "и вот я".data(using: String.Encoding.utf8)!
-        let ciphertext = try! aliceCipher.trywrapped_encryptMessage(recipientId: bobMockClient.recipientId,
+        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.recipientId,
                                                                     deviceId: bobMockClient.deviceId,
                                                                     paddedPlaintext: alicePlaintext,
                                                                     senderCertificate: senderCertificate,
@@ -121,7 +121,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         //    }
         let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
         do {
-            _ = try bobCipher.trywrapped_decryptMessage(certificateValidator: certificateValidator,
+            _ = try bobCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
                                                         cipherTextData: ciphertext,
                                                         timestamp: 31335,
                                                         localRecipientId: bobMockClient.recipientId,
@@ -163,7 +163,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    senderCertificate, "и вот я".getBytes());
         // NOTE: The java tests don't bother padding the plaintext.
         let alicePlaintext = "и вот я".data(using: String.Encoding.utf8)!
-        let ciphertext = try! aliceCipher.trywrapped_encryptMessage(recipientId: bobMockClient.recipientId,
+        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.recipientId,
                                                                     deviceId: bobMockClient.deviceId,
                                                                     paddedPlaintext: alicePlaintext,
                                                                     senderCertificate: senderCertificate,
@@ -180,7 +180,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    }
         let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
         do {
-            _ = try bobCipher.trywrapped_decryptMessage(certificateValidator: certificateValidator,
+            _ = try bobCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
                                                         cipherTextData: ciphertext,
                                                         timestamp: 31338,
                                                         localRecipientId: bobMockClient.recipientId,
@@ -224,7 +224,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    senderCertificate, "smert za smert".getBytes());
         // NOTE: The java tests don't bother padding the plaintext.
         let alicePlaintext = "smert za smert".data(using: String.Encoding.utf8)!
-        let ciphertext = try! aliceCipher.trywrapped_encryptMessage(recipientId: bobMockClient.recipientId,
+        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.recipientId,
                                                                     deviceId: bobMockClient.deviceId,
                                                                     paddedPlaintext: alicePlaintext,
                                                                     senderCertificate: senderCertificate,
@@ -240,7 +240,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    }
         let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
         do {
-            try bobCipher.trywrapped_decryptMessage(certificateValidator: certificateValidator,
+            try bobCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
                                                     cipherTextData: ciphertext,
                                                     timestamp: 31335,
                                                     localRecipientId: bobMockClient.recipientId,

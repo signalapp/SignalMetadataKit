@@ -69,7 +69,7 @@ class SMKSenderCertificateTest: XCTestCase {
 
         //        new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31336);
         let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-        try! certificateValidator.trywrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31336)
+        try! certificateValidator.throwswrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31336)
     }
 
     //    public void testExpiredSignature() throws InvalidCertificateException, InvalidKeyException {
@@ -121,7 +121,7 @@ class SMKSenderCertificateTest: XCTestCase {
         //        // good
         //        }
         let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-        XCTAssertThrowsError(try certificateValidator.trywrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31338))
+        XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31338))
     }
 
     //    public void testBadSignature() throws InvalidCertificateException, InvalidKeyException {
@@ -186,7 +186,7 @@ class SMKSenderCertificateTest: XCTestCase {
     //                // good
     //                }
                 let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.trywrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31336))
+                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31336))
             }
         }
     }

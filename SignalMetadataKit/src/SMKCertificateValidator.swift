@@ -10,9 +10,9 @@ public enum SMKCertificateError: Error {
 
 @objc public protocol SMKCertificateValidator: class {
 
-    @objc func trywrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws
+    @objc func throwswrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws
 
-    @objc func trywrapped_validate(serverCertificate: SMKServerCertificate) throws
+    @objc func throwswrapped_validate(serverCertificate: SMKServerCertificate) throws
 }
 
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/java/src/main/java/org/signal/libsignal/metadata/certificate/CertificateValidator.java
@@ -37,13 +37,13 @@ public enum SMKCertificateError: Error {
     }
 
 //    public void validate(SenderCertificate certificate, long validationTime) throws InvalidCertificateException {
-    @objc public func trywrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws {
+    @objc public func throwswrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws {
 //    try {
 //    ServerCertificate serverCertificate = certificate.getSigner();
         let serverCertificate = senderCertificate.signer
 
 //    validate(serverCertificate);
-        try trywrapped_validate(serverCertificate: serverCertificate)
+        try throwswrapped_validate(serverCertificate: serverCertificate)
 
 //    if (!Curve.verifySignature(serverCertificate.getKey(), certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");
@@ -74,7 +74,7 @@ public enum SMKCertificateError: Error {
 
 //    // VisibleForTesting
 //    void validate(ServerCertificate certificate) throws InvalidCertificateException {
-    @objc public func trywrapped_validate(serverCertificate: SMKServerCertificate) throws {
+    @objc public func throwswrapped_validate(serverCertificate: SMKServerCertificate) throws {
 //    try {
 //    if (!Curve.verifySignature(trustRoot, certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");

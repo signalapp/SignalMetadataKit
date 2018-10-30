@@ -127,7 +127,7 @@ public class SMKDecryptResult: NSObject {
     // public byte[] encrypt(SignalProtocolAddress destinationAddress, SenderCertificate senderCertificate, byte[]
     // paddedPlaintext)
     @objc
-    public func trywrapped_encryptMessage(recipientId: String,
+    public func throwswrapped_encryptMessage(recipientId: String,
                                           deviceId: Int32,
                                           paddedPlaintext: Data,
                                           senderCertificate: SMKSenderCertificate,
@@ -182,7 +182,7 @@ public class SMKDecryptResult: NSObject {
             ])
 
         // EphemeralKeys ephemeralKeys = calculateEphemeralKeys(theirIdentity, ephemeral.getPrivateKey(), ephemeralSalt);
-        let ephemeralKeys = try trywrapped_calculateEphemeralKeys(ephemeralPublicKey: theirIdentityKey,
+        let ephemeralKeys = try throwswrapped_calculateEphemeralKeys(ephemeralPublicKey: theirIdentityKey,
                                                                   ephemeralPrivateKey: ephemeral.ecPrivateKey(),
                                                                   salt: ephemeralSalt)
 
@@ -199,7 +199,7 @@ public class SMKDecryptResult: NSObject {
             ])
 
         // StaticKeys staticKeys = calculateStaticKeys(theirIdentity, ourIdentity.getPrivateKey(), staticSalt);
-        let staticKeys = try trywrapped_calculateStaticKeys(staticPublicKey: theirIdentityKey,
+        let staticKeys = try throwswrapped_calculateStaticKeys(staticPublicKey: theirIdentityKey,
                                                             staticPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
                                                             salt: staticSalt)
 
@@ -238,7 +238,7 @@ public class SMKDecryptResult: NSObject {
     // ProtocolInvalidVersionException, ProtocolDuplicateMessageException,
     // ProtocolInvalidKeyIdException, ProtocolUntrustedIdentityException
     @objc
-    public func trywrapped_decryptMessage(certificateValidator: SMKCertificateValidator,
+    public func throwswrapped_decryptMessage(certificateValidator: SMKCertificateValidator,
                                           cipherTextData: Data,
                                           timestamp: UInt64,
                                           localRecipientId: String,
@@ -270,7 +270,7 @@ public class SMKDecryptResult: NSObject {
 
             // EphemeralKeys ephemeralKeys = calculateEphemeralKeys(wrapper.getEphemeral(), ourIdentity.getPrivateKey(),
             // ephemeralSalt);
-            let ephemeralKeys = try trywrapped_calculateEphemeralKeys(ephemeralPublicKey: wrapper.ephemeralKey,
+            let ephemeralKeys = try throwswrapped_calculateEphemeralKeys(ephemeralPublicKey: wrapper.ephemeralKey,
                                                                       ephemeralPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
                                                                       salt: ephemeralSalt)
 
@@ -289,7 +289,7 @@ public class SMKDecryptResult: NSObject {
                 ])
 
             // StaticKeys staticKeys = calculateStaticKeys(staticKey, ourIdentity.getPrivateKey(), staticSalt);
-            let staticKeys = try trywrapped_calculateStaticKeys(staticPublicKey: staticKey,
+            let staticKeys = try throwswrapped_calculateStaticKeys(staticPublicKey: staticKey,
                                                                 staticPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
                                                                 salt: staticSalt)
 
@@ -308,7 +308,7 @@ public class SMKDecryptResult: NSObject {
             }
 
             // validator.validate(content.getSenderCertificate(), timestamp);
-            try certificateValidator.trywrapped_validate(senderCertificate: messageContent.senderCertificate,
+            try certificateValidator.throwswrapped_validate(senderCertificate: messageContent.senderCertificate,
                                                          validationTime: timestamp)
 
             // if (!MessageDigest.isEqual(content.getSenderCertificate().getKey().serialize(), staticKeyBytes)) {
@@ -320,7 +320,7 @@ public class SMKDecryptResult: NSObject {
                 throw SMKError.assertionError(description: "\(logTag) Sender's certificate key does not match key used in message.")
             }
 
-            let paddedMessagePlaintext = try trywrapped_decrypt(messageContent: messageContent, protocolContext: protocolContext)
+            let paddedMessagePlaintext = try throwswrapped_decrypt(messageContent: messageContent, protocolContext: protocolContext)
 
             // return new Pair<>(new SignalProtocolAddress(content.getSenderCertificate().getSender(),
             // content.getSenderCertificate().getSenderDeviceId()),
@@ -342,7 +342,7 @@ public class SMKDecryptResult: NSObject {
 
     // private EphemeralKeys calculateEphemeralKeys(ECPublicKey ephemeralPublic, ECPrivateKey ephemeralPrivate, byte[] salt)
     // throws InvalidKeyException {
-    private func trywrapped_calculateEphemeralKeys(ephemeralPublicKey: ECPublicKey,
+    private func throwswrapped_calculateEphemeralKeys(ephemeralPublicKey: ECPublicKey,
                                                    ephemeralPrivateKey: ECPrivateKey,
                                                    salt: Data) throws -> SMKEphemeralKeys {
         guard ephemeralPublicKey.keyData.count > 0 else {
@@ -382,7 +382,7 @@ public class SMKDecryptResult: NSObject {
 
     // private StaticKeys calculateStaticKeys(ECPublicKey staticPublic, ECPrivateKey staticPrivate, byte[] salt) throws
     // InvalidKeyException {
-    private func trywrapped_calculateStaticKeys(staticPublicKey: ECPublicKey,
+    private func throwswrapped_calculateStaticKeys(staticPublicKey: ECPublicKey,
                                                 staticPrivateKey: ECPrivateKey,
                                                 salt: Data) throws -> SMKStaticKeys {
         guard staticPublicKey.keyData.count > 0 else {
@@ -465,7 +465,7 @@ public class SMKDecryptResult: NSObject {
     // private byte[] decrypt(UnidentifiedSenderMessageContent message)
     // throws InvalidVersionException, InvalidMessageException, InvalidKeyException, DuplicateMessageException,
     // InvalidKeyIdException, UntrustedIdentityException, LegacyMessageException, NoSessionException
-    private func trywrapped_decrypt(messageContent: SMKUnidentifiedSenderMessageContent,
+    private func throwswrapped_decrypt(messageContent: SMKUnidentifiedSenderMessageContent,
                                     protocolContext: Any?) throws -> Data {
 
         // SignalProtocolAddress sender = new SignalProtocolAddress(message.getSenderCertificate().getSender(),
