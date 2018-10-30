@@ -328,6 +328,6 @@ class SMKSessionCipherTest: XCTestCase {
         try! RatchetingSession.initializeSession(aliceSessionState, sessionVersion: currentVersion, aliceParameters: aliceParameters)
 
 //    RatchetingSession.initializeSession(bobSessionState, bobParameters);
-        RatchetingSession.initializeSession(bobSessionState, sessionVersion: currentVersion, bobParameters: bobParameters)
+        try! RatchetingSession.initializeSession(bobSessionState, sessionVersion: currentVersion, bobParameters: bobParameters)
     }
 }

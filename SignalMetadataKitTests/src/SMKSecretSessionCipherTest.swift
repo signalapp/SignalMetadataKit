@@ -276,7 +276,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
 
 //    byte[] serverCertificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), serverCertificateBytes);
-        let serverCertificateSignature = Ed25519.sign(unsignedServerCertificateData, with: trustRoot)!
+        let serverCertificateSignature = try! Ed25519.sign(unsignedServerCertificateData, with: trustRoot)
 
 //    ServerCertificate serverCertificate = new ServerCertificate(SignalProtos.ServerCertificate.newBuilder()
 //    .setCertificate(ByteString.copyFrom(serverCertificateBytes))
@@ -305,7 +305,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         let unsignedSenderCertificateData = try! unsignedSenderCertificateBuilder.build().serializedData()
 
 //    byte[] senderCertificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), senderCertificateBytes);
-        let senderCertificateSignature = Ed25519.sign(unsignedSenderCertificateData, with: serverKey)!
+        let senderCertificateSignature = try! Ed25519.sign(unsignedSenderCertificateData, with: serverKey)
 
 //    return new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
 //    .setCertificate(ByteString.copyFrom(senderCertificateBytes))

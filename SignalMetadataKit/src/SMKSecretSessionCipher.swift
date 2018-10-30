@@ -182,9 +182,9 @@ public class SMKDecryptResult: NSObject {
             ])
 
         // EphemeralKeys ephemeralKeys = calculateEphemeralKeys(theirIdentity, ephemeral.getPrivateKey(), ephemeralSalt);
-        let ephemeralKeys = try calculateEphemeralKeys(ephemeralPublicKey: theirIdentityKey,
-                                                       ephemeralPrivateKey: ephemeral.ecPrivateKey(),
-                                                       salt: ephemeralSalt)
+        let ephemeralKeys = try trywrapped_calculateEphemeralKeys(ephemeralPublicKey: theirIdentityKey,
+                                                                  ephemeralPrivateKey: ephemeral.ecPrivateKey(),
+                                                                  salt: ephemeralSalt)
 
         // byte[] staticKeyCiphertext = encrypt(ephemeralKeys.cipherKey, ephemeralKeys.macKey,
         // ourIdentity.getPublicKey().getPublicKey().serialize());
@@ -199,9 +199,9 @@ public class SMKDecryptResult: NSObject {
             ])
 
         // StaticKeys staticKeys = calculateStaticKeys(theirIdentity, ourIdentity.getPrivateKey(), staticSalt);
-        let staticKeys = try calculateStaticKeys(staticPublicKey: theirIdentityKey,
-                                                 staticPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
-                                                 salt: staticSalt)
+        let staticKeys = try trywrapped_calculateStaticKeys(staticPublicKey: theirIdentityKey,
+                                                            staticPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
+                                                            salt: staticSalt)
 
         // UnidentifiedSenderMessageContent content = new UnidentifiedSenderMessageContent(message.getType(),
         // senderCertificate, message.serialize());
@@ -270,9 +270,9 @@ public class SMKDecryptResult: NSObject {
 
             // EphemeralKeys ephemeralKeys = calculateEphemeralKeys(wrapper.getEphemeral(), ourIdentity.getPrivateKey(),
             // ephemeralSalt);
-            let ephemeralKeys = try calculateEphemeralKeys(ephemeralPublicKey: wrapper.ephemeralKey,
-                                                           ephemeralPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
-                                                           salt: ephemeralSalt)
+            let ephemeralKeys = try trywrapped_calculateEphemeralKeys(ephemeralPublicKey: wrapper.ephemeralKey,
+                                                                      ephemeralPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
+                                                                      salt: ephemeralSalt)
 
             // byte[] staticKeyBytes = decrypt(ephemeralKeys.cipherKey, ephemeralKeys.macKey, wrapper.getEncryptedStatic());
             let staticKeyBytes = try decrypt(cipherKey: ephemeralKeys.cipherKey,
@@ -289,9 +289,9 @@ public class SMKDecryptResult: NSObject {
                 ])
 
             // StaticKeys staticKeys = calculateStaticKeys(staticKey, ourIdentity.getPrivateKey(), staticSalt);
-            let staticKeys = try calculateStaticKeys(staticPublicKey: staticKey,
-                                                     staticPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
-                                                     salt: staticSalt)
+            let staticKeys = try trywrapped_calculateStaticKeys(staticPublicKey: staticKey,
+                                                                staticPrivateKey: ourIdentityKeyPair.ecPrivateKey(),
+                                                                salt: staticSalt)
 
             // byte[] messageBytes = decrypt(staticKeys.cipherKey, staticKeys.macKey, wrapper.getEncryptedMessage());
             let messageBytes = try decrypt(cipherKey: staticKeys.cipherKey,
@@ -308,8 +308,8 @@ public class SMKDecryptResult: NSObject {
             }
 
             // validator.validate(content.getSenderCertificate(), timestamp);
-            try certificateValidator.validate(senderCertificate: messageContent.senderCertificate,
-                                                validationTime: timestamp)
+            try certificateValidator.trywrapped_validate(senderCertificate: messageContent.senderCertificate,
+                                                         validationTime: timestamp)
 
             // if (!MessageDigest.isEqual(content.getSenderCertificate().getKey().serialize(), staticKeyBytes)) {
             // throw new InvalidKeyException("Sender's certificate key does not match key used in message");
@@ -342,9 +342,9 @@ public class SMKDecryptResult: NSObject {
 
     // private EphemeralKeys calculateEphemeralKeys(ECPublicKey ephemeralPublic, ECPrivateKey ephemeralPrivate, byte[] salt)
     // throws InvalidKeyException {
-    private func calculateEphemeralKeys(ephemeralPublicKey: ECPublicKey,
-                                        ephemeralPrivateKey: ECPrivateKey,
-                                        salt: Data) throws -> SMKEphemeralKeys {
+    private func trywrapped_calculateEphemeralKeys(ephemeralPublicKey: ECPublicKey,
+                                                   ephemeralPrivateKey: ECPrivateKey,
+                                                   salt: Data) throws -> SMKEphemeralKeys {
         guard ephemeralPublicKey.keyData.count > 0 else {
             throw SMKError.assertionError(description: "\(logTag) invalid ephemeralPublicKey")
         }
@@ -359,7 +359,7 @@ public class SMKDecryptResult: NSObject {
         //
         // See:
         // https://github.com/signalapp/libsignal-protocol-java/blob/master/java/src/main/java/org/whispersystems/libsignal/ecc/Curve.java#L30
-        let ephemeralSecret = Curve25519.generateSharedSecret(fromPublicKey: ephemeralPublicKey.keyData, privateKey: ephemeralPrivateKey.keyData)
+        let ephemeralSecret = try Curve25519.generateSharedSecret(fromPublicKey: ephemeralPublicKey.keyData, privateKey: ephemeralPrivateKey.keyData)
 
         // byte[]   ephemeralDerived = new HKDFv3().deriveSecrets(ephemeralSecret, salt, new byte[0], 96);
         let kEphemeralDerivedLength: UInt = 96
@@ -382,9 +382,9 @@ public class SMKDecryptResult: NSObject {
 
     // private StaticKeys calculateStaticKeys(ECPublicKey staticPublic, ECPrivateKey staticPrivate, byte[] salt) throws
     // InvalidKeyException {
-    private func calculateStaticKeys(staticPublicKey: ECPublicKey,
-                                     staticPrivateKey: ECPrivateKey,
-                                     salt: Data) throws -> SMKStaticKeys {
+    private func trywrapped_calculateStaticKeys(staticPublicKey: ECPublicKey,
+                                                staticPrivateKey: ECPrivateKey,
+                                                salt: Data) throws -> SMKStaticKeys {
         guard staticPublicKey.keyData.count > 0 else {
             throw SMKError.assertionError(description: "\(logTag) invalid staticPublicKey")
         }
@@ -399,7 +399,7 @@ public class SMKDecryptResult: NSObject {
         //
         // See:
         // https://github.com/signalapp/libsignal-protocol-java/blob/master/java/src/main/java/org/whispersystems/libsignal/ecc/Curve.java#L30
-        let staticSecret = Curve25519.generateSharedSecret(fromPublicKey: staticPublicKey.keyData, privateKey: staticPrivateKey.keyData)
+        let staticSecret = try Curve25519.generateSharedSecret(fromPublicKey: staticPublicKey.keyData, privateKey: staticPrivateKey.keyData)
 
         // byte[] staticDerived = new HKDFv3().deriveSecrets(staticSecret, salt, new byte[0], 96);
         let kStaticDerivedLength: UInt = 96

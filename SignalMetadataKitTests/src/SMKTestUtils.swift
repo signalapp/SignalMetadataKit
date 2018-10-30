@@ -7,11 +7,11 @@ import SignalMetadataKit
 
 class MockCertificateValidator: NSObject, SMKCertificateValidator {
 
-    @objc public func validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws {
+    @objc public func trywrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws {
         // Do not throw
     }
 
-    @objc public func validate(serverCertificate: SMKServerCertificate) throws {
+    @objc public func trywrapped_validate(serverCertificate: SMKServerCertificate) throws {
         // Do not throw
     }
 }
@@ -170,7 +170,7 @@ class MockSignedPreKeyStore: NSObject, SignedPreKeyStore {
         let signedPreKeyId: Int32 = Int32(arc4random_uniform(UInt32(INT32_MAX)))
         let keyPair = Curve25519.generateKeyPair()
         let generatedAt = Date()
-        let signature = Ed25519.sign((keyPair.publicKey as NSData).prependKeyType() as Data, with: identityKeyPair)
+        let signature = try! Ed25519.sign((keyPair.publicKey as NSData).prependKeyType() as Data, with: identityKeyPair)
         let signedPreKey = SignedPreKeyRecord(id: signedPreKeyId, keyPair: keyPair, signature: signature, generatedAt: generatedAt)!
         keyMap[signedPreKeyId] = signedPreKey
         return signedPreKey

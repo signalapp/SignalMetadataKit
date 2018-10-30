@@ -10,9 +10,9 @@ public enum SMKCertificateError: Error {
 
 @objc public protocol SMKCertificateValidator: class {
 
-    @objc func validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws
+    @objc func trywrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws
 
-    @objc func validate(serverCertificate: SMKServerCertificate) throws
+    @objc func trywrapped_validate(serverCertificate: SMKServerCertificate) throws
 }
 
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/java/src/main/java/org/signal/libsignal/metadata/certificate/CertificateValidator.java
@@ -37,25 +37,25 @@ public enum SMKCertificateError: Error {
     }
 
 //    public void validate(SenderCertificate certificate, long validationTime) throws InvalidCertificateException {
-    @objc public func validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws {
+    @objc public func trywrapped_validate(senderCertificate: SMKSenderCertificate, validationTime: UInt64) throws {
 //    try {
 //    ServerCertificate serverCertificate = certificate.getSigner();
         let serverCertificate = senderCertificate.signer
 
 //    validate(serverCertificate);
-        try validate(serverCertificate: serverCertificate)
+        try trywrapped_validate(serverCertificate: serverCertificate)
 
 //    if (!Curve.verifySignature(serverCertificate.getKey(), certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");
 //    }
         let certificateData = try senderCertificate.toProto().certificate
-        guard Ed25519.verifySignature(senderCertificate.signatureData,
-                                      publicKey: serverCertificate.key.keyData,
-                                      data: certificateData) else {
-                                        Logger.error("Sender certificate signature verification failed.")
-                                        let error = SMKCertificateError.invalidCertificate(description: "Sender certificate signature verification failed.")
-                                        Logger.error("\(error)")
-                                        throw error
+        guard try Ed25519.verifySignature(senderCertificate.signatureData,
+                                          publicKey: serverCertificate.key.keyData,
+                                          data: certificateData) else {
+            Logger.error("Sender certificate signature verification failed.")
+            let error = SMKCertificateError.invalidCertificate(description: "Sender certificate signature verification failed.")
+            Logger.error("\(error)")
+            throw error
         }
 
 //    if (validationTime > certificate.getExpiration()) {
@@ -74,7 +74,7 @@ public enum SMKCertificateError: Error {
 
 //    // VisibleForTesting
 //    void validate(ServerCertificate certificate) throws InvalidCertificateException {
-    @objc public func validate(serverCertificate: SMKServerCertificate) throws {
+    @objc public func trywrapped_validate(serverCertificate: SMKServerCertificate) throws {
 //    try {
 //    if (!Curve.verifySignature(trustRoot, certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");
@@ -84,13 +84,13 @@ public enum SMKCertificateError: Error {
         let certificateData = try certificateBuilder.build().serializedData()
 
 //            let certificateData = try serverCertificate.toProto().certificate
-        guard Ed25519.verifySignature(serverCertificate.signatureData,
-                                      publicKey: trustRoot.keyData,
-                                      data: certificateData) else {
-                                        let error = SMKCertificateError.invalidCertificate(description: "Server certificate signature verification failed.")
-                                        Logger.error("\(error)")
-                                        throw error
-            }
+        guard try Ed25519.verifySignature(serverCertificate.signatureData,
+                                          publicKey: trustRoot.keyData,
+                                          data: certificateData) else {
+                                            let error = SMKCertificateError.invalidCertificate(description: "Server certificate signature verification failed.")
+                                            Logger.error("\(error)")
+                                            throw error
+        }
 //    if (REVOKED.contains(certificate.getKeyId())) {
 //    throw new InvalidCertificateException("Server certificate has been revoked");
 //    }

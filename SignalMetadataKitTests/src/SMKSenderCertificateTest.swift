@@ -53,7 +53,7 @@ class SMKSenderCertificateTest: XCTestCase {
         let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
 
         //        byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
-        let senderCertificateSignature = Ed25519.sign(unsignedSenderCertificateData, with: serverKey)!
+        let senderCertificateSignature = try! Ed25519.sign(unsignedSenderCertificateData, with: serverKey)
 
         //        SenderCertificate senderCertificate  = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
         //            .setCertificate(ByteString.copyFrom(certificateBytes))
@@ -69,7 +69,7 @@ class SMKSenderCertificateTest: XCTestCase {
 
         //        new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31336);
         let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-        try! certificateValidator.validate(senderCertificate: signedSenderCertificate, validationTime: 31336)
+        try! certificateValidator.trywrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31336)
     }
 
     //    public void testExpiredSignature() throws InvalidCertificateException, InvalidKeyException {
@@ -100,7 +100,7 @@ class SMKSenderCertificateTest: XCTestCase {
         let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
 
         //        byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
-        let senderCertificateSignature = Ed25519.sign(unsignedSenderCertificateData, with: serverKey)!
+        let senderCertificateSignature = try! Ed25519.sign(unsignedSenderCertificateData, with: serverKey)
 
         //        SenderCertificate senderCertificate  = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
         //            .setCertificate(ByteString.copyFrom(certificateBytes))
@@ -121,7 +121,7 @@ class SMKSenderCertificateTest: XCTestCase {
         //        // good
         //        }
         let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-        XCTAssertThrowsError(try certificateValidator.validate(senderCertificate: signedSenderCertificate, validationTime: 31338))
+        XCTAssertThrowsError(try certificateValidator.trywrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31338))
     }
 
     //    public void testBadSignature() throws InvalidCertificateException, InvalidKeyException {
@@ -152,7 +152,7 @@ class SMKSenderCertificateTest: XCTestCase {
         let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
 
     //        byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
-        let senderCertificateSignature = Ed25519.sign(unsignedSenderCertificateData, with: serverKey)!
+        let senderCertificateSignature = try! Ed25519.sign(unsignedSenderCertificateData, with: serverKey)
 
     //        for (int i=0;i<certificateSignature.length;i++) {
         for i in 0..<senderCertificateSignature.count {
@@ -186,7 +186,7 @@ class SMKSenderCertificateTest: XCTestCase {
     //                // good
     //                }
                 let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.validate(senderCertificate: signedSenderCertificate, validationTime: 31336))
+                XCTAssertThrowsError(try certificateValidator.trywrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31336))
             }
         }
     }
@@ -206,7 +206,7 @@ class SMKSenderCertificateTest: XCTestCase {
         let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
 
         //        byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
-        let serverCertificateSignature = Ed25519.sign(unsignedServerCertificateData, with: trustRoot)!
+        let serverCertificateSignature = try! Ed25519.sign(unsignedServerCertificateData, with: trustRoot)
 
         //        return SignalProtos.ServerCertificate.newBuilder()
         //            .setCertificate(ByteString.copyFrom(certificateBytes))
