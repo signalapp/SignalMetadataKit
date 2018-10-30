@@ -364,7 +364,7 @@ public class SMKDecryptResult: NSObject {
         // byte[]   ephemeralDerived = new HKDFv3().deriveSecrets(ephemeralSecret, salt, new byte[0], 96);
         let kEphemeralDerivedLength: UInt = 96
         let ephemeralDerived: Data =
-            HKDFKit.deriveKey(ephemeralSecret, info: Data(), salt: salt, outputSize: Int32(kEphemeralDerivedLength))
+            try HKDFKit.deriveKey(ephemeralSecret, info: Data(), salt: salt, outputSize: Int32(kEphemeralDerivedLength))
         guard ephemeralDerived.count == kEphemeralDerivedLength else {
             throw SMKError.assertionError(description: "\(logTag) derived ephemeral has unexpected length: \(ephemeralDerived.count).")
         }
@@ -404,7 +404,7 @@ public class SMKDecryptResult: NSObject {
         // byte[] staticDerived = new HKDFv3().deriveSecrets(staticSecret, salt, new byte[0], 96);
         let kStaticDerivedLength: UInt = 96
         let staticDerived: Data =
-            HKDFKit.deriveKey(staticSecret, info: Data(), salt: salt, outputSize: Int32(kStaticDerivedLength))
+            try HKDFKit.deriveKey(staticSecret, info: Data(), salt: salt, outputSize: Int32(kStaticDerivedLength))
         guard staticDerived.count == kStaticDerivedLength else {
             throw SMKError.assertionError(description: "\(logTag) could not derive static.")
         }
