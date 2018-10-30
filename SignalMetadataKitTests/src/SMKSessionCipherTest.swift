@@ -107,19 +107,19 @@ class SMKSessionCipherTest: XCTestCase {
 //    }
         for _ in 1...2010 {
             let plaintext = "you've never been so hungry, you've never been so cold".data(using: String.Encoding.utf8)!
-            let message = aliceCipher.encryptMessage(plaintext, protocolContext: nil)
+            let message = try! aliceCipher.encryptMessage(plaintext, protocolContext: nil)
             inflight.append(message)
         }
 
 //    bobCipher.decrypt(new SignalMessage(inflight.get(1000).serialize()));
 //    bobCipher.decrypt(new SignalMessage(inflight.get(inflight.size()-1).serialize()));
-        let midpointMessage = bobCipher.decrypt(inflight[1000], protocolContext: nil)
+        let midpointMessage = try! bobCipher.decrypt(inflight[1000], protocolContext: nil)
         XCTAssertNotNil(midpointMessage)
-        let lastMessage = bobCipher.decrypt(inflight.last!, protocolContext: nil)
+        let lastMessage = try! bobCipher.decrypt(inflight.last!, protocolContext: nil)
         XCTAssertNotNil(lastMessage)
 
         // TODO: Why isn't this failing?
-        let firstMessage = bobCipher.decrypt(inflight[0], protocolContext: nil)
+        let firstMessage = try! bobCipher.decrypt(inflight[0], protocolContext: nil)
         XCTAssertNotNil(firstMessage)
 //    try {
 //    bobCipher.decrypt(new SignalMessage(inflight.get(0).serialize()));
@@ -155,9 +155,9 @@ class SMKSessionCipherTest: XCTestCase {
         // TODO: Why isn't the java test padding the plaintext?
         let alicePaddedPlaintext = (alicePlaintext as NSData).paddedMessageBody()!
 //    CiphertextMessage message        = aliceCipher.encrypt(alicePlaintext);
-        let message = aliceCipher.encryptMessage(alicePaddedPlaintext, protocolContext: nil)
+        let message = try! aliceCipher.encryptMessage(alicePaddedPlaintext, protocolContext: nil)
 //    byte[]            bobPlaintext   = bobCipher.decrypt(new SignalMessage(message.serialize()));
-        let bobPaddedPlaintext = bobCipher.decrypt(message, protocolContext: nil)
+        let bobPaddedPlaintext = try! bobCipher.decrypt(message, protocolContext: nil)
         let bobPlaintext = (bobPaddedPlaintext as NSData).removePadding()
 
 //    assertTrue(Arrays.equals(alicePlaintext, bobPlaintext));
@@ -167,9 +167,9 @@ class SMKSessionCipherTest: XCTestCase {
         let bobReply = "This is a message from Bob.".data(using: String.Encoding.utf8)!
         let bobReplyPadded = (bobReply as NSData).paddedMessageBody()!
 //    CiphertextMessage reply         = bobCipher.encrypt(bobReply);
-        let reply = bobCipher.encryptMessage(bobReplyPadded, protocolContext: nil)
+        let reply = try! bobCipher.encryptMessage(bobReplyPadded, protocolContext: nil)
 //    byte[]            receivedReply = aliceCipher.decrypt(new SignalMessage(reply.serialize()));
-        let receivedReplyPadded = aliceCipher.decrypt(reply, protocolContext: nil)
+        let receivedReplyPadded = try! aliceCipher.decrypt(reply, protocolContext: nil)
         let receivedReply = (receivedReplyPadded as NSData).removePadding()
 
 //    assertTrue(Arrays.equals(bobReply, receivedReply));
@@ -185,7 +185,7 @@ class SMKSessionCipherTest: XCTestCase {
         //    aliceCiphertextMessages.add(aliceCipher.encrypt(("смерть за смерть " + i).getBytes()));
         for i in 1...50 {
             let plaintext = "смерть за смерть \(i)".data(using: String.Encoding.utf8)!
-            let message = aliceCipher.encryptMessage(plaintext, protocolContext: nil)
+            let message = try! aliceCipher.encryptMessage(plaintext, protocolContext: nil)
             aliceMessages.append((plaintext:plaintext, message:message))
         }
 
@@ -203,7 +203,7 @@ class SMKSessionCipherTest: XCTestCase {
         let aliceMessagesLeft = aliceMessages[0 ..< alicePivot]
         let aliceMessagesRight = aliceMessages[alicePivot ..< aliceMessages.count]
         for (plaintext, message) in aliceMessagesLeft {
-            let receivedPlaintext = bobCipher.decrypt(message, protocolContext: nil)
+            let receivedPlaintext = try! bobCipher.decrypt(message, protocolContext: nil)
             XCTAssertEqual(plaintext, receivedPlaintext)
         }
 
@@ -217,7 +217,7 @@ class SMKSessionCipherTest: XCTestCase {
 //    }
         for i in 1...20 {
             let plaintext = "смерть за смерть \(i)".data(using: String.Encoding.utf8)!
-            let message = bobCipher.encryptMessage(plaintext, protocolContext: nil)
+            let message = try! bobCipher.encryptMessage(plaintext, protocolContext: nil)
             bobMessages.append((plaintext:plaintext, message:message))
         }
 
@@ -235,7 +235,7 @@ class SMKSessionCipherTest: XCTestCase {
         let bobMessagesLeft = bobMessages[0 ..< bobPivot]
         let bobMessagesRight = bobMessages[bobPivot ..< bobMessages.count]
         for (plaintext, message) in bobMessagesLeft {
-            let receivedPlaintext = aliceCipher.decrypt(message, protocolContext: nil)
+            let receivedPlaintext = try! aliceCipher.decrypt(message, protocolContext: nil)
             XCTAssertEqual(plaintext, receivedPlaintext)
         }
 
@@ -244,7 +244,7 @@ class SMKSessionCipherTest: XCTestCase {
 //    assertTrue(Arrays.equals(receivedPlaintext, alicePlaintextMessages.get(i)));
 //    }
         for (plaintext, message) in aliceMessagesRight {
-            let receivedPlaintext = bobCipher.decrypt(message, protocolContext: nil)
+            let receivedPlaintext = try! bobCipher.decrypt(message, protocolContext: nil)
             XCTAssertEqual(plaintext, receivedPlaintext)
         }
 //
@@ -253,7 +253,7 @@ class SMKSessionCipherTest: XCTestCase {
 //    assertTrue(Arrays.equals(receivedPlaintext, bobPlaintextMessages.get(i)));
 //    }
         for (plaintext, message) in bobMessagesRight {
-            let receivedPlaintext = aliceCipher.decrypt(message, protocolContext: nil)
+            let receivedPlaintext = try! aliceCipher.decrypt(message, protocolContext: nil)
             XCTAssertEqual(plaintext, receivedPlaintext)
         }
     }
@@ -325,9 +325,9 @@ class SMKSessionCipherTest: XCTestCase {
         // TODO: We could expose this constant in SessionBuilder.h.
         let currentVersion: Int32 = 3
 //    RatchetingSession.initializeSession(aliceSessionState, aliceParameters);
-        RatchetingSession.initializeSession(aliceSessionState, sessionVersion: currentVersion, aliceParameters: aliceParameters)
+        try! RatchetingSession.initializeSession(aliceSessionState, sessionVersion: currentVersion, aliceParameters: aliceParameters)
 
 //    RatchetingSession.initializeSession(bobSessionState, bobParameters);
-        RatchetingSession.initializeSession(bobSessionState, sessionVersion: currentVersion, bobParameters: bobParameters)
+        try! RatchetingSession.initializeSession(bobSessionState, sessionVersion: currentVersion, bobParameters: bobParameters)
     }
 }

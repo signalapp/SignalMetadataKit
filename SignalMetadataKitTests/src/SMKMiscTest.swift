@@ -138,7 +138,7 @@ class SMKTest: XCTestCase {
                                            identityKey: try! bobMockClient.identityKeyPair.ecPublicKey().serialized)!
 
         let aliceToBobSessionBuilder = aliceMockClient.createSessionBuilder(forRecipient: bobMockClient)
-        aliceToBobSessionBuilder.processPrekeyBundle(bobPreKeyBundle, protocolContext: nil)
+        try! aliceToBobSessionBuilder.processPrekeyBundle(bobPreKeyBundle, protocolContext: nil)
 
         let aliceToBobCipher = try! aliceMockClient.createSecretSessionCipher()
 
@@ -153,17 +153,19 @@ class SMKTest: XCTestCase {
                                                      senderRecipientId: aliceMockClient.recipientId,
                                                      expirationTimestamp: 789,
                                                      signatureData: Randomness.generateRandomBytes(100)!)
-        let encryptedMessage = try! aliceToBobCipher.encryptMessage(recipientId: bobMockClient.recipientId,
-                                                                    deviceId: bobMockClient.deviceId,
-                                                                    paddedPlaintext: paddedPlaintext, senderCertificate: senderCertificate, protocolContext: nil)
+        let encryptedMessage = try! aliceToBobCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.recipientId,
+                                                                               deviceId: bobMockClient.deviceId,
+                                                                               paddedPlaintext: paddedPlaintext, senderCertificate: senderCertificate, protocolContext: nil)
 
         let messageTimestamp = NSDate.ows_millisecondTimeStamp()
 
         let bobToAliceCipher = try! bobMockClient.createSecretSessionCipher()
-        let decryptedMessage = try! bobToAliceCipher.decryptMessage(certificateValidator: certificateValidator, cipherTextData: encryptedMessage, timestamp: messageTimestamp,
-                                                                    localRecipientId: bobMockClient.recipientId,
-                                                                    localDeviceId: bobMockClient.deviceId,
-                                                                    protocolContext: nil)
+        let decryptedMessage = try! bobToAliceCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
+                                                                               cipherTextData: encryptedMessage,
+                                                                               timestamp: messageTimestamp,
+                                                                               localRecipientId: bobMockClient.recipientId,
+                                                                               localDeviceId: bobMockClient.deviceId,
+                                                                               protocolContext: nil)
         let payload = (decryptedMessage.paddedPayload as NSData).removePadding()
 
         XCTAssertEqual(aliceMockClient.recipientId, decryptedMessage.senderRecipientId)

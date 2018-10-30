@@ -72,7 +72,7 @@ class SMKServerCertificateTest: XCTestCase {
         let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
 
 //        byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
-        let serverCertificateSignature = Ed25519.sign(unsignedServerCertificateData, with: trustRoot)!
+        let serverCertificateSignature = try! Ed25519.sign(unsignedServerCertificateData, with: trustRoot)
 
 //    byte[] serialized = SignalProtos.ServerCertificate.newBuilder()
 //    .setCertificate(ByteString.copyFrom(certificateBytes))
@@ -86,7 +86,7 @@ class SMKServerCertificateTest: XCTestCase {
 
 //    new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
         let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-        try! certificateValidator.validate(serverCertificate: parsed)
+        try! certificateValidator.throwswrapped_validate(serverCertificate: parsed)
     }
 
 //    public void testBadSignature() throws Exception {
@@ -108,7 +108,7 @@ class SMKServerCertificateTest: XCTestCase {
         let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
 
 //    byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
-        let serverCertificateSignature = Ed25519.sign(unsignedServerCertificateData, with: trustRoot)!
+        let serverCertificateSignature = try! Ed25519.sign(unsignedServerCertificateData, with: trustRoot)
 
 //    for (int i=0;i<certificateSignature.length;i++) {
         for i in 0..<serverCertificateSignature.count {
@@ -140,7 +140,7 @@ class SMKServerCertificateTest: XCTestCase {
 //    // good
 //    }
                 let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.validate(serverCertificate: parsed))
+                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: parsed))
             }
         }
 
@@ -192,7 +192,7 @@ class SMKServerCertificateTest: XCTestCase {
 //    }
                 //    }
                 let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.validate(serverCertificate: parsed))
+                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: parsed))
             }
         }
     }
