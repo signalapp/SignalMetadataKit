@@ -329,11 +329,11 @@ class SMKSecretSessionCipherTest: XCTestCase {
     private func initializeSessions(aliceMockClient: MockClient,
                             bobMockClient: MockClient) {
 //    ECKeyPair          bobPreKey       = Curve.generateKeyPair();
-        let bobPreKey = bobMockClient.generatePreKey()
+        let bobPreKey = bobMockClient.generateMockPreKey()
 //    IdentityKeyPair    bobIdentityKey  = bobStore.getIdentityKeyPair();
         let bobIdentityKey = bobMockClient.identityKeyPair
 //    SignedPreKeyRecord bobSignedPreKey = KeyHelper.generateSignedPreKey(bobIdentityKey, 2);
-        let bobSignedPreKey = bobMockClient.generateSignedPreKey()
+        let bobSignedPreKey = bobMockClient.generateMockSignedPreKey()
 //
 //    PreKeyBundle bobBundle             = new PreKeyBundle(1, 1, 1, bobPreKey.getPublicKey(), 2, bobSignedPreKey.getKeyPair().getPublicKey(), bobSignedPreKey.getSignature(), bobIdentityKey.getPublicKey());
         let bobBundle = PreKeyBundle(registrationId: bobMockClient.registrationId,
