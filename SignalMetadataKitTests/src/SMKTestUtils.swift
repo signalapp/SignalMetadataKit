@@ -24,10 +24,10 @@ class MockClient: NSObject {
 
     let identityKeyPair: ECKeyPair
 
-    let sessionStore: AxolotlInMemoryStore
-    let preKeyStore: AxolotlInMemoryStore
-    let signedPreKeyStore: AxolotlInMemoryStore
-    let identityStore: AxolotlInMemoryStore
+    let sessionStore: SPKMockProtocolStore
+    let preKeyStore: SPKMockProtocolStore
+    let signedPreKeyStore: SPKMockProtocolStore
+    let identityStore: SPKMockProtocolStore
 
     init(recipientId: String, deviceId: Int32, registrationId: Int32) {
         self.recipientId = recipientId
@@ -35,7 +35,7 @@ class MockClient: NSObject {
         self.registrationId = registrationId
         self.identityKeyPair = Curve25519.generateKeyPair()
 
-        let protocolStore = AxolotlInMemoryStore(identityKeyPair: identityKeyPair, localRegistrationId: registrationId)
+        let protocolStore = SPKMockProtocolStore(identityKeyPair: identityKeyPair, localRegistrationId: registrationId)
 
         sessionStore = protocolStore
         preKeyStore = protocolStore
@@ -68,7 +68,7 @@ class MockClient: NSObject {
                               deviceId: recipient.deviceId)
     }
 
-    func generatePreKey() -> PreKeyRecord {
+    func generateMockPreKey() -> PreKeyRecord {
         let preKeyId: Int32 = Int32(arc4random_uniform(UInt32(INT32_MAX)))
         let keyPair = Curve25519.generateKeyPair()
         let preKey = PreKeyRecord(id: preKeyId, keyPair: keyPair)!
@@ -76,7 +76,7 @@ class MockClient: NSObject {
         return preKey
     }
 
-    func generateSignedPreKey() -> SignedPreKeyRecord {
+    func generateMockSignedPreKey() -> SignedPreKeyRecord {
         let signedPreKeyId: Int32 = Int32(arc4random_uniform(UInt32(INT32_MAX)))
         let keyPair = Curve25519.generateKeyPair()
         let generatedAt = Date()
