@@ -5,6 +5,33 @@
 import Foundation
 
 @objc
+public class SecretSessionKnownSenderError: NSObject, CustomNSError {
+    @objc
+    public static let kSenderRecipientIdKey = "kSenderRecipientIdKey"
+
+    @objc
+    public static let kSenderDeviceIdKey = "kSenderDeviceIdKey"
+
+    let senderRecipientId: String
+    let senderDeviceId: UInt32
+    let underlyingError: Error
+
+    init(senderRecipientId: String, senderDeviceId: UInt32, underlyingError: Error) {
+        self.senderRecipientId = senderRecipientId
+        self.senderDeviceId = senderDeviceId
+        self.underlyingError = underlyingError
+    }
+
+    public var errorUserInfo: [String : Any] {
+        return [
+            type(of: self).kSenderRecipientIdKey: self.senderRecipientId,
+            type(of: self).kSenderDeviceIdKey: self.senderDeviceId,
+            NSUnderlyingErrorKey: underlyingError
+        ]
+    }
+}
+
+@objc
 public enum SMKSecretSessionCipherError: Int, Error {
     case selfSentMessage
 }
@@ -301,16 +328,26 @@ public class SMKDecryptResult: NSObject {
         // content = new UnidentifiedSenderMessageContent(messageBytes);
         let messageContent = try SMKUnidentifiedSenderMessageContent.parse(data: messageBytes)
 
-        guard messageContent.senderCertificate.senderRecipientId != localRecipientId ||
-            messageContent.senderCertificate.senderDeviceId != localDeviceId else {
+        let senderRecipientId = messageContent.senderCertificate.senderRecipientId
+        let senderDeviceId = messageContent.senderCertificate.senderDeviceId
+
+        guard senderRecipientId != localRecipientId || senderDeviceId != localDeviceId else {
                 Logger.info("Discarding self-sent message")
                 throw SMKSecretSessionCipherError.selfSentMessage
         }
 
         // validator.validate(content.getSenderCertificate(), timestamp);
-        
-        try certificateValidator.throwswrapped_validate(senderCertificate: messageContent.senderCertificate,
-                                                        validationTime: timestamp)
+
+        let wrapAsKnownSenderError = { (underlyingError: Error) in
+            return SecretSessionKnownSenderError(senderRecipientId: senderRecipientId, senderDeviceId: senderDeviceId, underlyingError: underlyingError)
+        }
+
+        do {
+            try certificateValidator.throwswrapped_validate(senderCertificate: messageContent.senderCertificate,
+                                                            validationTime: timestamp)
+        } catch {
+            throw wrapAsKnownSenderError(error)
+        }
 
         // if (!MessageDigest.isEqual(content.getSenderCertificate().getKey().serialize(), staticKeyBytes)) {
         // throw new InvalidKeyException("Sender's certificate key does not match key used in message");
@@ -318,20 +355,25 @@ public class SMKDecryptResult: NSObject {
         //
         // NOTE: Constant time comparison.
         guard messageContent.senderCertificate.key.serialized.ows_constantTimeIsEqual(to: staticKeyBytes) else {
-            throw SMKError.assertionError(description: "\(logTag) Sender's certificate key does not match key used in message.")
+            let underlyingError = SMKError.assertionError(description: "\(logTag) Sender's certificate key does not match key used in message.")
+            throw wrapAsKnownSenderError(underlyingError)
         }
 
-        let paddedMessagePlaintext = try throwswrapped_decrypt(messageContent: messageContent, protocolContext: protocolContext)
+        let paddedMessagePlaintext: Data
+        do {
+             paddedMessagePlaintext = try throwswrapped_decrypt(messageContent: messageContent, protocolContext: protocolContext)
+        } catch {
+            throw wrapAsKnownSenderError(error)
+        }
 
         // return new Pair<>(new SignalProtocolAddress(content.getSenderCertificate().getSender(),
         // content.getSenderCertificate().getSenderDeviceId()),
         // decrypt(content));
         //
         // NOTE: We use the sender properties from the sender certificate, not from this class' properties.
-        let senderRecipientId = messageContent.senderCertificate.senderRecipientId
-        let senderDeviceId = messageContent.senderCertificate.senderDeviceId
         guard senderDeviceId >= 0 && senderDeviceId <= INT_MAX else {
-            throw SMKError.assertionError(description: "\(logTag) Invalid senderDeviceId.")
+            let underlyingError = SMKError.assertionError(description: "\(logTag) Invalid senderDeviceId.")
+            throw wrapAsKnownSenderError(underlyingError)
         }
         return SMKDecryptResult(senderRecipientId: senderRecipientId,
                                 senderDeviceId: Int(senderDeviceId),
