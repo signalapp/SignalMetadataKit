@@ -32,10 +32,12 @@ import Foundation
         // TODO: Should we have a default case in our switches? Probably.
         var messageType: SMKMessageType
         switch (proto.type) {
-        case .prekeyMessage:
+        case .prekeyMessage?:
             messageType = .prekey
-        case .message:
+        case .message?:
             messageType = .whisper
+        case .none:
+            throw SMKProtoError.invalidProtobuf(description: "\(logTag) missing required field: proto.type")
         }
 
         let contentData = proto.content
@@ -54,9 +56,9 @@ import Foundation
             builderType = .prekeyMessage
         }
 
-        let builder = SMKProtoUnidentifiedSenderMessageMessage.builder(type: builderType,
-                                                                       senderCertificate: try senderCertificate.toProto(),
+        let builder = SMKProtoUnidentifiedSenderMessageMessage.builder(senderCertificate: try senderCertificate.toProto(),
                                                                        content: contentData)
+        builder.setType(builderType)
         return try builder.build()
     }
 
