@@ -3,7 +3,7 @@
 PROTOC=protoc \
 		--proto_path='./'
 WRAPPER_SCRIPT=../../Signal-iOS/Scripts/ProtoWrappers.py \
-		--proto-dir='./' --verbose
+		--proto-dir='./' --verbose --skip-address-helpers
 
 all: unidentified_delivery_protos
 
