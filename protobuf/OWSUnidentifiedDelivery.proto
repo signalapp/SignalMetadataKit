@@ -55,7 +55,6 @@ message UnidentifiedSenderMessage {
             MESSAGE = 2;
         }
 
-        // @required
         optional Type type = 1;
         // @required
         optional SenderCertificate senderCertificate = 2;
