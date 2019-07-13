@@ -13,76 +13,41 @@ import Foundation
     @objc public let senderDeviceId: UInt32
     @objc public let senderRecipientId: String
     @objc public let expirationTimestamp: UInt64
+    @objc public let serializedData: Data
+    @objc public let certificateData: Data
     @objc public let signatureData: Data
 
-    @objc public init(signer: SMKServerCertificate,
-                      key: ECPublicKey,
-                      senderDeviceId: UInt32,
-                      senderRecipientId: String,
-                      expirationTimestamp: UInt64,
-                      signatureData: Data) {
-        self.signer = signer
-        self.key = key
-        self.senderDeviceId = senderDeviceId
-        self.senderRecipientId = senderRecipientId
-        self.expirationTimestamp = expirationTimestamp
-        self.signatureData = signatureData
-    }
+    public init(serializedData: Data) throws {
+        // SignalProtos.SenderCertificate wrapper = SignalProtos.SenderCertificate.parseFrom(serialized);
+        //
+        // if (!wrapper.hasSignature() || !wrapper.hasCertificate()) {
+        //     throw new InvalidCertificateException("Missing fields");
+        // }
+        let wrapperProto = try SMKProtoSenderCertificate.parseData(serializedData)
 
-    @objc public class func parse(data: Data) throws -> SMKSenderCertificate {
-        let proto = try SMKProtoSenderCertificate.parseData(data)
-        return try parse(proto: proto)
-    }
+        // SignalProtos.SenderCertificate.Certificate certificate = SignalProtos.SenderCertificate.Certificate.parseFrom(wrapper.getCertificate());
+        //
+        // if (!certificate.hasSigner() || !certificate.hasIdentityKey() || !certificate.hasSenderDevice() || !certificate.hasExpires() || !certificate.hasSender()) {
+        //     throw new InvalidCertificateException("Missing fields");
+        // }
+        let certificateProto = try SMKProtoSenderCertificateCertificate.parseData(wrapperProto.certificate)
 
-    @objc public class func parse(proto: SMKProtoSenderCertificate) throws -> SMKSenderCertificate {
+        // this.signer         = new ServerCertificate(certificate.getSigner().toByteArray());
+        // this.key            = Curve.decodePoint(certificate.getIdentityKey().toByteArray(), 0);
+        // this.sender         = certificate.getSender();
+        // this.senderDeviceId = certificate.getSenderDevice();
+        // this.expiration     = certificate.getExpires();
+        self.signer = try SMKServerCertificate(serializedData: certificateProto.signer.serializedData())
+        self.key = try ECPublicKey(serializedKeyData: certificateProto.identityKey)
+        self.senderRecipientId = certificateProto.sender
+        self.senderDeviceId = certificateProto.senderDevice
+        self.expirationTimestamp = certificateProto.expires
 
-        let certificateData = proto.certificate
-        let signatureData = proto.signature
-
-        let certificateProto = try SMKProtoSenderCertificateCertificate.parseData(certificateData)
-
-        let keyData = certificateProto.identityKey
-        let key = try ECPublicKey(serializedKeyData: keyData)
-        let senderDeviceId = certificateProto.senderDevice
-        let senderRecipientId = certificateProto.sender
-        let expirationTimestamp = certificateProto.expires
-        let signerProto = certificateProto.signer
-        let signer = try SMKServerCertificate.parse(proto: signerProto)
-
-        return SMKSenderCertificate(signer: signer, key: key, senderDeviceId: senderDeviceId, senderRecipientId: senderRecipientId, expirationTimestamp: expirationTimestamp, signatureData: signatureData)
-    }
-
-    @objc public func toProto() throws -> SMKProtoSenderCertificate {
-        let certificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
-                                                                              senderDevice: senderDeviceId,
-                                                                              expires: expirationTimestamp,
-                                                                              identityKey: key.serialized,
-                                                                              signer: try signer.toProto())
-
-        let builder =
-            SMKProtoSenderCertificate.builder(certificate: try certificateBuilder.buildSerializedData(),
-                                              signature: signatureData)
-        return try builder.build()
-    }
-
-    @objc public func serialized() throws -> Data {
-        return try toProto().serializedData()
-    }
-
-    open override func isEqual(_ other: Any?) -> Bool {
-        if let other = other as? SMKSenderCertificate {
-            return (signer.isEqual(other.signer) &&
-                key.isEqual(other.key) &&
-                senderDeviceId == other.senderDeviceId &&
-                senderRecipientId == other.senderRecipientId &&
-                expirationTimestamp == other.expirationTimestamp &&
-                signatureData == other.signatureData)
-        } else {
-            return false
-        }
-    }
-
-    public override var hash: Int {
-        return signer.hashValue ^ key.hashValue ^ senderDeviceId.hashValue ^ senderRecipientId.hashValue ^ expirationTimestamp.hashValue ^ signatureData.hashValue
+        // this.serialized  = serialized;
+        // this.certificate = wrapper.getCertificate().toByteArray();
+        // this.signature   = wrapper.getSignature().toByteArray();
+        self.serializedData = serializedData
+        self.certificateData = wrapperProto.certificate
+        self.signatureData = wrapperProto.signature
     }
 }

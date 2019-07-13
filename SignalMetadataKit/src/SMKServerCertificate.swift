@@ -10,55 +10,37 @@ import Foundation
 
     @objc public let keyId: UInt32
     @objc public let key: ECPublicKey
+    @objc public let serializedData: Data
+    @objc public let certificateData: Data
     @objc public let signatureData: Data
 
-    public init(keyId: UInt32,
-                key: ECPublicKey,
-                signatureData: Data) {
-        self.keyId = keyId
-        self.key = key
-        self.signatureData = signatureData
-    }
+    // public ServerCertificate(byte[] serialized) throws InvalidCertificateException {
+    public init(serializedData: Data) throws {
+        // SignalProtos.ServerCertificate wrapper = SignalProtos.ServerCertificate.parseFrom(serialized);
+        // if (!wrapper.hasCertificate() || !wrapper.hasSignature()) {
+        //   throw new InvalidCertificateException("Missing fields");
+        // }
+        let wrapperProto = try SMKProtoServerCertificate.parseData(serializedData)
 
-    @objc public class func parse(data: Data) throws -> SMKServerCertificate {
-        let proto = try SMKProtoServerCertificate.parseData(data)
-        return try parse(proto: proto)
-    }
+        // SignalProtos.ServerCertificate.Certificate certificate = // SignalProtos.ServerCertificate.Certificate.parseFrom(wrapper.getCertificate());
+        //
+        // if (!certificate.hasId() || !certificate.hasKey()) {
+        //   throw new InvalidCertificateException("Missing fields");
+        // }
+        let certificateProto = try SMKProtoServerCertificateCertificate.parseData(wrapperProto.certificate)
 
-    @objc public class func parse(proto: SMKProtoServerCertificate) throws -> SMKServerCertificate {
-        let signatureData = proto.signature
-        let certificateData = proto.certificate
-        let certificateProto = try SMKProtoServerCertificateCertificate.parseData(certificateData)
-        let keyId = certificateProto.id
-        let keyData = certificateProto.key
-        let key = try ECPublicKey(serializedKeyData: keyData)
-        return SMKServerCertificate(keyId: keyId, key: key, signatureData: signatureData)
-    }
+        // this.keyId       = certificate.getId();
+        self.keyId = certificateProto.id
 
-    @objc public func toProto() throws -> SMKProtoServerCertificate {
-        let certificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId, key: key.serialized)
+        // this.key         = Curve.decodePoint(certificate.getKey().toByteArray(), 0);
+        self.key = try ECPublicKey(serializedKeyData: certificateProto.key)
 
-        let builder =
-            SMKProtoServerCertificate.builder(certificate: try certificateBuilder.buildSerializedData(),
-                                              signature: signatureData)
-        return try builder.build()
-    }
+        // this.serialized  = serialized;
+        self.serializedData = serializedData
 
-    @objc public func serialized() throws -> Data {
-        return try toProto().serializedData()
-    }
-
-    open override func isEqual(_ other: Any?) -> Bool {
-        if let other = other as? SMKServerCertificate {
-            return (keyId == other.keyId &&
-                key.isEqual(other.key) &&
-                (signatureData == other.signatureData))
-        } else {
-            return false
-        }
-    }
-
-    public override var hash: Int {
-        return keyId.hashValue ^ key.hashValue ^ signatureData.hashValue
+        // this.certificate = wrapper.getCertificate().toByteArray();
+        // this.signature   = wrapper.getSignature().toByteArray();
+        self.certificateData = wrapperProto.certificate
+        self.signatureData = wrapperProto.signature
     }
 }

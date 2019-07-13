@@ -30,46 +30,37 @@ class SMKSenderCertificateTest: XCTestCase {
         let serverKey = Curve25519.generateKeyPair()
         let key       = Curve25519.generateKeyPair()
 
-        //        byte[] certificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
-        //            .setSender("+14152222222")
-        //            .setSenderDevice(1)
-        //            .setExpires(31337)
-        //            .setIdentityKey(ByteString.copyFrom(key.getPublicKey().serialize()))
-        //            .setSigner(getServerCertificate(serverKey))
-        //            .build()
-        //            .toByteArray();
+        // byte[] certificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
+        //     .setSender("+14152222222")
+        //     .setSenderDevice(1)
+        //     .setExpires(31337)
+        //     .setIdentityKey(ByteString.copyFrom(key.getPublicKey().serialize()))
+        //     .setSigner(getServerCertificate(serverKey))
+        //     .build()
+        //     .toByteArray();
+        let signer = try! getServerCertificate(serverKey: serverKey)
+        let certificateData = try! SMKProtoSenderCertificateCertificate.builder(sender: "+14152222222",
+                                                                                senderDevice: 1,
+                                                                                expires: 31337,
+                                                                                identityKey: key.ecPublicKey().serialized,
+                                                                                signer: signer).buildSerializedData()
 
-        let senderRecipientId = "+14152222222"
-        let senderDeviceId: UInt32 = 1
-        let expirationTimestamp: UInt64 = 31337
+        // byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
+        let certificateSignature = try! Ed25519.sign(certificateData, with: serverKey)
 
-        let serverCertificate = getServerCertificate(serverKey: serverKey, trustRoot: trustRoot)
-        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
-                                                                                      senderDevice: senderDeviceId,
-                                                                                      expires: expirationTimestamp,
-                                                                                      identityKey: try! key.ecPublicKey().serialized,
-                                                                                      signer: try! serverCertificate.toProto())
-        unsignedCertificateBuilder.setSigner(try! serverCertificate.toProto())
-        let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
+        // SenderCertificate senderCertificate  = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
+        //     .setCertificate(ByteString.copyFrom(certificateBytes))
+        //     .setSignature(ByteString.copyFrom(certificateSignature))
+        //     .build()
+        //     .toByteArray());
+        let senderCertificateData = try! SMKProtoSenderCertificate.builder(certificate: certificateData,
+                                                                           signature: certificateSignature)
+            .buildSerializedData()
+        let senderCertificate = try! SMKSenderCertificate(serializedData: senderCertificateData)
 
-        //        byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
-        let senderCertificateSignature = try! Ed25519.sign(unsignedSenderCertificateData, with: serverKey)
-
-        //        SenderCertificate senderCertificate  = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
-        //            .setCertificate(ByteString.copyFrom(certificateBytes))
-        //            .setSignature(ByteString.copyFrom(certificateSignature))
-        //            .build()
-        //            .toByteArray());
-        let signedSenderCertificate = SMKSenderCertificate(signer: serverCertificate,
-                                                           key: try! key.ecPublicKey(),
-                                                           senderDeviceId: senderDeviceId,
-                                                           senderRecipientId: senderRecipientId,
-                                                           expirationTimestamp: expirationTimestamp,
-                                                           signatureData: senderCertificateSignature)
-
-        //        new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31336);
+        // new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31336);
         let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-        try! certificateValidator.throwswrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31336)
+        try! certificateValidator.throwswrapped_validate(senderCertificate: senderCertificate, validationTime: 31336)
     }
 
     //    public void testExpiredSignature() throws InvalidCertificateException, InvalidKeyException {
@@ -77,51 +68,44 @@ class SMKSenderCertificateTest: XCTestCase {
         //        ECKeyPair serverKey = Curve.generateKeyPair();
         //        ECKeyPair key       = Curve.generateKeyPair();
         let serverKey = Curve25519.generateKeyPair()
-        let key       = Curve25519.generateKeyPair()
+        let key = Curve25519.generateKeyPair()
 
-        //        byte[] certificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
-        //            .setSender("+14152222222")
-        //            .setSenderDevice(1)
-        //            .setExpires(31337)
-        //            .setIdentityKey(ByteString.copyFrom(key.getPublicKey().serialize()))
-        //            .setSigner(getServerCertificate(serverKey))
-        //            .build()
-        //            .toByteArray();
-        let senderRecipientId = "+14152222222"
-        let senderDeviceId: UInt32 = 1
-        let expirationTimestamp: UInt64 = 31337
+        // byte[] certificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
+        //     .setSender("+14152222222")
+        //     .setSenderDevice(1)
+        //     .setExpires(31337)
+        //     .setIdentityKey(ByteString.copyFrom(key.getPublicKey().serialize()))
+        //     .setSigner(getServerCertificate(serverKey))
+        //     .build()
+        //     .toByteArray();
+        let signer = try! getServerCertificate(serverKey: serverKey)
+        let certificateData = try! SMKProtoSenderCertificateCertificate.builder(sender: "+14152222222",
+                                                                                senderDevice: 1,
+                                                                                expires: 31337,
+                                                                                identityKey: key.ecPublicKey().serialized,
+                                                                                signer: signer).buildSerializedData()
 
-        let serverCertificate = getServerCertificate(serverKey: serverKey, trustRoot: trustRoot)
-        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
-                                                                                      senderDevice: senderDeviceId,
-                                                                                      expires: expirationTimestamp,
-                                                                                      identityKey: try! key.ecPublicKey().serialized,
-                                                                                      signer: try! serverCertificate.toProto())
-        let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
+        // byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
+        let certificateSignature = try! Ed25519.sign(certificateData, with: serverKey)
 
-        //        byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
-        let senderCertificateSignature = try! Ed25519.sign(unsignedSenderCertificateData, with: serverKey)
+        // SenderCertificate senderCertificate  = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
+        //     .setCertificate(ByteString.copyFrom(certificateBytes))
+        //     .setSignature(ByteString.copyFrom(certificateSignature))
+        //     .build()
+        //     .toByteArray());
+        let senderCertificateData = try! SMKProtoSenderCertificate.builder(certificate: certificateData,
+                                                                           signature: certificateSignature)
+            .buildSerializedData()
+        let senderCertificate = try! SMKSenderCertificate(serializedData: senderCertificateData)
 
-        //        SenderCertificate senderCertificate  = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
-        //            .setCertificate(ByteString.copyFrom(certificateBytes))
-        //            .setSignature(ByteString.copyFrom(certificateSignature))
-        //            .build()
-        //            .toByteArray());
-        let signedSenderCertificate = SMKSenderCertificate(signer: serverCertificate,
-                                                           key: try! key.ecPublicKey(),
-                                                           senderDeviceId: senderDeviceId,
-                                                           senderRecipientId: senderRecipientId,
-                                                           expirationTimestamp: expirationTimestamp,
-                                                           signatureData: senderCertificateSignature)
-
-        //        try {
-        //        new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31338);
-        //        throw new AssertionError();
-        //        } catch (InvalidCertificateException e) {
-        //        // good
-        //        }
+        // try {
+        //   new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31338);
+        //   throw new AssertionError();
+        // } catch (InvalidCertificateException e) {
+        //   // good
+        // }
         let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-        XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31338))
+        XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(senderCertificate: senderCertificate, validationTime: 31338))
     }
 
     //    public void testBadSignature() throws InvalidCertificateException, InvalidKeyException {
@@ -129,92 +113,82 @@ class SMKSenderCertificateTest: XCTestCase {
     //        ECKeyPair serverKey = Curve.generateKeyPair();
     //        ECKeyPair key       = Curve.generateKeyPair();
         let serverKey = Curve25519.generateKeyPair()
-        let key       = Curve25519.generateKeyPair()
+        let key = Curve25519.generateKeyPair()
 
-    //        byte[] certificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
-    //            .setSender("+14152222222")
-    //            .setSenderDevice(1)
-    //            .setExpires(31337)
-    //            .setIdentityKey(ByteString.copyFrom(key.getPublicKey().serialize()))
-    //            .setSigner(getServerCertificate(serverKey))
-    //            .build()
-    //            .toByteArray();
-        let senderRecipientId = "+14152222222"
-        let senderDeviceId: UInt32 = 1
-        let expirationTimestamp: UInt64 = 31337
+        // byte[] certificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
+        //     .setSender("+14152222222")
+        //     .setSenderDevice(1)
+        //     .setExpires(31337)
+        //     .setIdentityKey(ByteString.copyFrom(key.getPublicKey().serialize()))
+        //     .setSigner(getServerCertificate(serverKey))
+        //     .build()
+        //     .toByteArray();
+        let signer = try! getServerCertificate(serverKey: serverKey)
+        let certificateData = try! SMKProtoSenderCertificateCertificate.builder(sender: "+14152222222",
+                                                                                senderDevice: 1,
+                                                                                expires: 31337,
+                                                                                identityKey: key.ecPublicKey().serialized,
+                                                                                signer: signer).buildSerializedData()
 
-        let serverCertificate = getServerCertificate(serverKey: serverKey, trustRoot: trustRoot)
-        let unsignedCertificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
-                                                                                      senderDevice: senderDeviceId,
-                                                                                      expires: expirationTimestamp,
-                                                                                      identityKey: try! key.ecPublicKey().serialized,
-                                                                                      signer: try! serverCertificate.toProto())
-        let unsignedSenderCertificateData = try! unsignedCertificateBuilder.build().serializedData()
+        // byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
+        let certificateSignature = try! Ed25519.sign(certificateData, with: serverKey)
 
-    //        byte[] certificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), certificateBytes);
-        let senderCertificateSignature = try! Ed25519.sign(unsignedSenderCertificateData, with: serverKey)
-
-    //        for (int i=0;i<certificateSignature.length;i++) {
-        for i in 0..<senderCertificateSignature.count {
-    //            for (int b=0;b<8;b++) {
+        // for (int i=0;i<certificateSignature.length;i++) {
+        //   for (int b=0;b<8;b++) {
+        for i in 0..<certificateSignature.count {
             for b in 0..<8 {
     //                byte[] badSignature = new byte[certificateSignature.length];
     //                System.arraycopy(certificateSignature, 0, badSignature, 0, certificateSignature.length);
-                var badSignature = senderCertificateSignature
+                var badSignature = certificateSignature
 
     //                badSignature[i] = (byte)(badSignature[i] ^ 1 << b);
                 badSignature.withUnsafeMutableBytes { (bytes: UnsafeMutablePointer<UInt8>) in
                     bytes[i] = (UInt8)(bytes[i] ^ 1 << b)
                 }
 
-    //                SenderCertificate senderCertificate = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
-    //                    .setCertificate(ByteString.copyFrom(certificateBytes))
-    //                    .setSignature(ByteString.copyFrom(badSignature))
-    //                    .build()
-    //                    .toByteArray());
-                let signedSenderCertificate = SMKSenderCertificate(signer: serverCertificate,
-                                                                   key: try! key.ecPublicKey(),
-                                                                   senderDeviceId: senderDeviceId,
-                                                                   senderRecipientId: senderRecipientId,
-                                                                   expirationTimestamp: expirationTimestamp,
-                                                                   signatureData: badSignature)
+                // SenderCertificate senderCertificate = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
+                //     .setCertificate(ByteString.copyFrom(certificateBytes))
+                //     .setSignature(ByteString.copyFrom(badSignature))
+                //     .build()
+                //     .toByteArray());
+                let serializedData = try! SMKProtoSenderCertificate.builder(certificate: certificateData,
+                                                                            signature: badSignature).buildSerializedData()
+                let senderCertificate = try! SMKSenderCertificate(serializedData: serializedData)
 
-    //                try {
-    //                new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31336);
-    //                throw new AssertionError();
-    //                } catch (InvalidCertificateException e) {
-    //                // good
-    //                }
+                // try {
+                //   new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31336);
+                //   throw new AssertionError();
+                // } catch (InvalidCertificateException e) {
+                //   // good
+                // }
                 let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(senderCertificate: signedSenderCertificate, validationTime: 31336))
+                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(senderCertificate: senderCertificate,
+                                                                                     validationTime: 31336))
             }
         }
     }
 
     // MARK: - Utils
 
-    //    private SignalProtos.ServerCertificate getServerCertificate(ECKeyPair serverKey) throws InvalidKeyException, InvalidCertificateException {
-    private func getServerCertificate(serverKey: ECKeyPair, trustRoot: ECKeyPair) -> SMKServerCertificate {
-        //        byte[] certificateBytes = SignalProtos.ServerCertificate.Certificate.newBuilder()
-        //            .setId(1)
-        //            .setKey(ByteString.copyFrom(serverKey.getPublicKey().serialize()))
-        //            .build()
-        //            .toByteArray();
-        let keyId: UInt32 = 1
-        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId,
-                                                                                            key: try! serverKey.ecPublicKey().serialized)
-        let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
+    // private SignalProtos.ServerCertificate getServerCertificate(ECKeyPair serverKey) throws InvalidKeyException, InvalidCertificateException {
+    private func getServerCertificate(serverKey: ECKeyPair) throws -> SMKProtoServerCertificate {
+        // byte[] certificateBytes = SignalProtos.ServerCertificate.Certificate.newBuilder()
+        //     .setId(1)
+        //     .setKey(ByteString.copyFrom(serverKey.getPublicKey().serialize()))
+        //     .build()
+        //     .toByteArray();
+        let certificateData = try! SMKProtoServerCertificateCertificate.builder(id: 1,
+                                                                                key: serverKey.ecPublicKey().serialized)
+            .buildSerializedData()
 
-        //        byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
-        let serverCertificateSignature = try! Ed25519.sign(unsignedServerCertificateData, with: trustRoot)
+        // byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
+        let certificateSignature = try! Ed25519.sign(certificateData, with: trustRoot)
 
-        //        return SignalProtos.ServerCertificate.newBuilder()
-        //            .setCertificate(ByteString.copyFrom(certificateBytes))
-        //            .setSignature(ByteString.copyFrom(certificateSignature))
-        //            .build();
-        let signedServerCertificate = SMKServerCertificate(keyId: keyId,
-                                                           key: try! serverKey.ecPublicKey(),
-                                                           signatureData: serverCertificateSignature)
-        return signedServerCertificate
+        // return SignalProtos.ServerCertificate.newBuilder()
+        //     .setCertificate(ByteString.copyFrom(certificateBytes))
+        //     .setSignature(ByteString.copyFrom(certificateSignature))
+        //     .build();
+        return try! SMKProtoServerCertificate.builder(certificate: certificateData,
+                                                      signature: certificateSignature).build()
     }
 }

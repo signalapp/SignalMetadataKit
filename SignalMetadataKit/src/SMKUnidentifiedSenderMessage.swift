@@ -13,41 +13,23 @@ import Foundation
     public let ephemeralKey: ECPublicKey
     public let encryptedStatic: Data
     public let encryptedMessage: Data
+    public let serializedData: Data
 
-    public init(cipherTextVersion: UInt,
-                ephemeralKey: ECPublicKey,
-                encryptedStatic: Data,
-                encryptedMessage: Data) {
-        self.cipherTextVersion = cipherTextVersion
-        self.ephemeralKey = ephemeralKey
-        self.encryptedStatic = encryptedStatic
-        self.encryptedMessage = encryptedMessage
-    }
-
-    public init(ephemeralKey: ECPublicKey,
-                encryptedStatic: Data,
-                encryptedMessage: Data) {
-        self.cipherTextVersion = SMKUnidentifiedSenderMessage.kSMKMessageCipherTextVersion
-        self.ephemeralKey = ephemeralKey
-        self.encryptedStatic = encryptedStatic
-        self.encryptedMessage = encryptedMessage
-    }
-
-    @objc public class func parse(dataAndPrefix: Data) throws -> SMKUnidentifiedSenderMessage {
+    public init(serializedData: Data) throws {
         // public UnidentifiedSenderMessage(byte[] serialized)
         // throws InvalidMetadataMessageException, InvalidMetadataVersionException
 
-        let parser = OWSDataParser(data: dataAndPrefix)
+        let parser = OWSDataParser(data: serializedData)
 
         // this.version = ByteUtil.highBitsToInt(serialized[0]);
         let versionByte = try parser.nextByte(name: "version byte")
-        let cipherTextVersion = UInt(SerializationUtilities.highBitsToInt(fromByte: versionByte))
+        self.cipherTextVersion = UInt(SerializationUtilities.highBitsToInt(fromByte: versionByte))
 
         // if (version > CIPHERTEXT_VERSION) {
         // throw new InvalidMetadataVersionException("Unknown version: " + this.version);
         // }
         guard cipherTextVersion <= SMKUnidentifiedSenderMessage.kSMKMessageCipherTextVersion else {
-            throw SMKError.assertionError(description: "\(logTag) unknown cipher text version: \(cipherTextVersion)")
+            throw SMKError.assertionError(description: "\(type(of: self)) unknown cipherTextVersion: \(cipherTextVersion)")
         }
 
         // SignalProtos.UnidentifiedSenderMessage unidentifiedSenderMessage =
@@ -65,30 +47,45 @@ import Foundation
 
         // this.ephemeral        = Curve.decodePoint(unidentifiedSenderMessage.getEphemeralPublic().toByteArray(), 0);
         let ephemeralKeyData = proto.ephemeralPublic
-        let ephemeralKey = try ECPublicKey(serializedKeyData: ephemeralKeyData)
+        self.ephemeralKey = try ECPublicKey(serializedKeyData: ephemeralKeyData)
 
         // this.encryptedStatic  = unidentifiedSenderMessage.getEncryptedStatic().toByteArray();
-        let encryptedStatic = proto.encryptedStatic
+        self.encryptedStatic = proto.encryptedStatic
 
         // this.encryptedMessage = unidentifiedSenderMessage.getEncryptedMessage().toByteArray();
-        let encryptedMessage = proto.encryptedMessage
+        self.encryptedMessage = proto.encryptedMessage
 
-        return SMKUnidentifiedSenderMessage(cipherTextVersion: cipherTextVersion, ephemeralKey: ephemeralKey, encryptedStatic: encryptedStatic, encryptedMessage: encryptedMessage)
+        // this.serialized       = serialized;
+        self.serializedData = serializedData
     }
 
-    @objc public func toProto() throws -> SMKProtoUnidentifiedSenderMessage {
-        let builder = SMKProtoUnidentifiedSenderMessage.builder(ephemeralPublic: ephemeralKey.serialized,
-                                                                encryptedStatic: encryptedStatic,
-                                                                encryptedMessage: encryptedMessage)
-        return try builder.build()
-    }
+    // public UnidentifiedSenderMessage(ECPublicKey ephemeral, byte[] encryptedStatic, byte[] encryptedMessage) {
+    public init(ephemeralKey: ECPublicKey, encryptedStatic: Data, encryptedMessage: Data) throws {
+        // this.version          = CIPHERTEXT_VERSION;
+        // this.ephemeral        = ephemeral;
+        // this.encryptedStatic  = encryptedStatic;
+        // this.encryptedMessage = encryptedMessage;
+        self.cipherTextVersion = SMKUnidentifiedSenderMessage.kSMKMessageCipherTextVersion
+        self.ephemeralKey = ephemeralKey
+        self.encryptedStatic = encryptedStatic
+        self.encryptedMessage = encryptedMessage
 
-    @objc public func serialized() throws -> Data {
+        // byte[] versionBytes = {ByteUtil.intsToByteHighAndLow(CIPHERTEXT_VERSION, CIPHERTEXT_VERSION)};
         let versionByte: UInt8 = UInt8((self.cipherTextVersion << 4 | self.cipherTextVersion) & 0xFF)
         let versionBytes = [versionByte]
         let versionData = Data(versionBytes)
-        let messageData = try toProto().serializedData()
 
-        return NSData.join([versionData, messageData])
+        // byte[] messageBytes = SignalProtos.UnidentifiedSenderMessage.newBuilder()
+        //     .setEncryptedMessage(ByteString.copyFrom(encryptedMessage))
+        //     .setEncryptedStatic(ByteString.copyFrom(encryptedStatic))
+        //     .setEphemeralPublic(ByteString.copyFrom(ephemeral.serialize()))
+        //     .build()
+        //     .toByteArray();
+        let messageData = try SMKProtoUnidentifiedSenderMessage.builder(ephemeralPublic: ephemeralKey.serialized,
+                                                                        encryptedStatic: encryptedStatic,
+                                                                        encryptedMessage: encryptedMessage).buildSerializedData()
+
+        // this.serialized = ByteUtil.combine(versionBytes, messageBytes);
+        self.serializedData = NSData.join([versionData, messageData])
     }
 }

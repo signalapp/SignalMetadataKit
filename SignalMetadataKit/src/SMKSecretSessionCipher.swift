@@ -241,21 +241,21 @@ public class SMKDecryptResult: NSObject {
         default:
             throw SMKError.assertionError(description: "\(logTag) Unknown cipher message type.")
         }
-        let messageContent = SMKUnidentifiedSenderMessageContent(messageType: messageType,
+        let messageContent = try SMKUnidentifiedSenderMessageContent(messageType: messageType,
                                                senderCertificate: senderCertificate,
                                                contentData: encryptedMessageData)
 
         // byte[] messageBytes = encrypt(staticKeys.cipherKey, staticKeys.macKey, content.getSerialized());
         let messageData = try encrypt(cipherKey: staticKeys.cipherKey,
                                       macKey: staticKeys.macKey,
-                                      plaintextData: try messageContent.serialized())
+                                      plaintextData: messageContent.serializedData)
 
         // return new UnidentifiedSenderMessage(ephemeral.getPublicKey(), staticKeyCiphertext,
         // messageBytes).getSerialized();
-        let message = SMKUnidentifiedSenderMessage(ephemeralKey: try ephemeral.ecPublicKey(),
+        let message = try SMKUnidentifiedSenderMessage(ephemeralKey: try ephemeral.ecPublicKey(),
                                  encryptedStatic: staticKeyCipherData,
                                  encryptedMessage: messageData)
-        return try message.serialized()
+        return message.serializedData
     }
 
     // public Pair<SignalProtocolAddress, byte[]> decrypt(CertificateValidator validator, byte[] ciphertext, long
@@ -282,7 +282,7 @@ public class SMKDecryptResult: NSObject {
         }
 
         // UnidentifiedSenderMessage wrapper = new UnidentifiedSenderMessage(ciphertext);
-        let wrapper = try SMKUnidentifiedSenderMessage.parse(dataAndPrefix: cipherTextData)
+        let wrapper = try SMKUnidentifiedSenderMessage(serializedData: cipherTextData)
 
         // byte[] ephemeralSalt = ByteUtil.combine("UnidentifiedDelivery".getBytes(),
         // ourIdentity.getPublicKey().getPublicKey().serialize(), wrapper.getEphemeral().serialize());
@@ -326,7 +326,7 @@ public class SMKDecryptResult: NSObject {
                                        cipherTextWithMac: wrapper.encryptedMessage)
 
         // content = new UnidentifiedSenderMessageContent(messageBytes);
-        let messageContent = try SMKUnidentifiedSenderMessageContent.parse(data: messageBytes)
+        let messageContent = try SMKUnidentifiedSenderMessageContent(serializedData: messageBytes)
 
         let senderRecipientId = messageContent.senderCertificate.senderRecipientId
         let senderDeviceId = messageContent.senderCertificate.senderDeviceId

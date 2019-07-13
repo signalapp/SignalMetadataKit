@@ -272,62 +272,61 @@ class SMKSecretSessionCipherTest: XCTestCase {
 //    ECKeyPair serverKey = Curve.generateKeyPair();
         let serverKey = Curve25519.generateKeyPair()
 
-//    byte[] serverCertificateBytes = SignalProtos.ServerCertificate.Certificate.newBuilder()
-//    .setId(1)
-//    .setKey(ByteString.copyFrom(serverKey.getPublicKey().serialize()))
-//    .build()
-//    .toByteArray();
-        let keyId: UInt32 = 1
-        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId,
-                                                                                            key: try! serverKey.ecPublicKey().serialized)
-        let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
+        // byte[] serverCertificateBytes = SignalProtos.ServerCertificate.Certificate.newBuilder()
+        //     .setId(1)
+        //     .setKey(ByteString.copyFrom(serverKey.getPublicKey().serialize()))
+        //     .build()
+        //     .toByteArray();
+        let serverCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: 1,
+                                                                                    key: try! serverKey.ecPublicKey().serialized)
+        let serverCertificateData = try! serverCertificateBuilder.build().serializedData()
 
-//    byte[] serverCertificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), serverCertificateBytes);
-        let serverCertificateSignature = try! Ed25519.sign(unsignedServerCertificateData, with: trustRoot)
+        // byte[] serverCertificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), serverCertificateBytes);
+        let serverCertificateSignature = try! Ed25519.sign(serverCertificateData, with: trustRoot)
 
-//    ServerCertificate serverCertificate = new ServerCertificate(SignalProtos.ServerCertificate.newBuilder()
-//    .setCertificate(ByteString.copyFrom(serverCertificateBytes))
-//    .setSignature(ByteString.copyFrom(serverCertificateSignature))
-//    .build()
-//    .toByteArray());
-        let signedServerCertificate = SMKServerCertificate(keyId: keyId,
-                                                           key: try! serverKey.ecPublicKey(),
-                                                           signatureData: serverCertificateSignature)
-        XCTAssertEqual(try! signedServerCertificate.toProto().certificate, unsignedServerCertificateData)
-        _ = try! signedServerCertificate.serialized()
+        // ServerCertificate serverCertificate = new ServerCertificate(SignalProtos.ServerCertificate.newBuilder()
+        //     .setCertificate(ByteString.copyFrom(serverCertificateBytes))
+        //     .setSignature(ByteString.copyFrom(serverCertificateSignature))
+        //     .build()
+        //     .toByteArray());
+        let serverCertificate: SMKServerCertificate = {
+            let builder = SMKProtoServerCertificate.builder(certificate: serverCertificateData,
+                                                            signature: serverCertificateSignature)
 
-//    byte[] senderCertificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
-//    .setSender(sender)
-//    .setSenderDevice(deviceId)
-//    .setIdentityKey(ByteString.copyFrom(identityKey.serialize()))
-//    .setExpires(expires)
-//    .setSigner(SignalProtos.ServerCertificate.parseFrom(serverCertificate.getSerialized()))
-//    .build()
-//    .toByteArray();
-        let unsignedSenderCertificateBuilder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
-                                                                                            senderDevice: senderDeviceId,
-                                                                                            expires: expirationTimestamp,
-                                                                                            identityKey: identityKey.serialized,
-                                                                                            signer: try! signedServerCertificate.toProto())
-        let unsignedSenderCertificateData = try! unsignedSenderCertificateBuilder.build().serializedData()
+            return try! SMKServerCertificate(serializedData: try! builder.buildSerializedData())
+        }()
 
-//    byte[] senderCertificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), senderCertificateBytes);
-        let senderCertificateSignature = try! Ed25519.sign(unsignedSenderCertificateData, with: serverKey)
+        // byte[] senderCertificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
+        //     .setSender(sender)
+        //     .setSenderDevice(deviceId)
+        //     .setIdentityKey(ByteString.copyFrom(identityKey.serialize()))
+        //     .setExpires(expires)
+        //     .setSigner(SignalProtos.ServerCertificate.parseFrom(serverCertificate.getSerialized()))
+        //     .build()
+        //     .toByteArray();
+        let senderCertificateData: Data = {
+            let signer = try! SMKProtoServerCertificate.parseData(serverCertificate.serializedData)
+            let builder = SMKProtoSenderCertificateCertificate.builder(sender: senderRecipientId,
+                                                                       senderDevice: senderDeviceId,
+                                                                       expires: expirationTimestamp,
+                                                                       identityKey: identityKey.serialized,
+                                                                       signer: signer)
+            return try! builder.buildSerializedData()
+        }()
 
-//    return new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
-//    .setCertificate(ByteString.copyFrom(senderCertificateBytes))
-//    .setSignature(ByteString.copyFrom(senderCertificateSignature))
-//    .build()
-//    .toByteArray());
+        // byte[] senderCertificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), senderCertificateBytes);
+        let senderCertificateSignature = try! Ed25519.sign(senderCertificateData, with: serverKey)
 
-        let signedSenderCertificate = SMKSenderCertificate(signer: signedServerCertificate,
-                                         key: identityKey,
-                                         senderDeviceId: senderDeviceId,
-                                         senderRecipientId: senderRecipientId,
-                                         expirationTimestamp: expirationTimestamp,
-                                         signatureData: senderCertificateSignature)
-        XCTAssertEqual(try! signedSenderCertificate.signer.toProto().certificate, unsignedServerCertificateData)
-        return signedSenderCertificate
+        // return new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
+        //     .setCertificate(ByteString.copyFrom(senderCertificateBytes))
+        //     .setSignature(ByteString.copyFrom(senderCertificateSignature))
+        //     .build()
+        //     .toByteArray());
+        return {
+            let builder = SMKProtoSenderCertificate.builder(certificate: senderCertificateData,
+                                                            signature: senderCertificateSignature)
+            return try! SMKSenderCertificate(serializedData: try! builder.buildSerializedData())
+        }()
     }
 
 //    private void initializeSessions(TestInMemorySignalProtocolStore aliceStore, TestInMemorySignalProtocolStore bobStore)

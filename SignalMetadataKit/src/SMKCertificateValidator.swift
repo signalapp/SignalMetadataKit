@@ -48,10 +48,9 @@ public enum SMKCertificateError: Error {
 //    if (!Curve.verifySignature(serverCertificate.getKey(), certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");
 //    }
-        let certificateData = try senderCertificate.toProto().certificate
         guard try Ed25519.verifySignature(senderCertificate.signatureData,
                                           publicKey: serverCertificate.key.keyData,
-                                          data: certificateData) else {
+                                          data: senderCertificate.certificateData) else {
             Logger.error("Sender certificate signature verification failed.")
             let error = SMKCertificateError.invalidCertificate(description: "Sender certificate signature verification failed.")
             Logger.error("\(error)")
@@ -79,14 +78,10 @@ public enum SMKCertificateError: Error {
 //    if (!Curve.verifySignature(trustRoot, certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");
 //    }
-        let certificateBuilder = SMKProtoServerCertificateCertificate.builder(id: serverCertificate.keyId,
-                                                                              key: serverCertificate.key.serialized)
-        let certificateData = try certificateBuilder.build().serializedData()
-
 //            let certificateData = try serverCertificate.toProto().certificate
         guard try Ed25519.verifySignature(serverCertificate.signatureData,
                                           publicKey: trustRoot.keyData,
-                                          data: certificateData) else {
+                                          data: serverCertificate.certificateData) else {
                                             let error = SMKCertificateError.invalidCertificate(description: "Server certificate signature verification failed.")
                                             Logger.error("\(error)")
                                             throw error

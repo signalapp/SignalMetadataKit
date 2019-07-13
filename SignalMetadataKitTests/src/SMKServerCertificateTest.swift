@@ -60,33 +60,31 @@ class SMKServerCertificateTest: XCTestCase {
         let trustRoot = Curve25519.generateKeyPair()
         let keyPair = Curve25519.generateKeyPair()
 
-//    SignalProtos.ServerCertificate.Certificate certificate = SignalProtos.ServerCertificate.Certificate.newBuilder()
-//    .setId(1)
-//    .setKey(ByteString.copyFrom(keyPair.getPublicKey().serialize()))
-//    .build();
-        let keyId: UInt32 = 1
-        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId,
-                                                                                            key: try! keyPair.ecPublicKey().serialized)
+        // SignalProtos.ServerCertificate.Certificate certificate = SignalProtos.ServerCertificate.Certificate.newBuilder()
+        //     .setId(1)
+        //     .setKey(ByteString.copyFrom(keyPair.getPublicKey().serialize()))
+        //     .build();
+        let certificateBuilder = SMKProtoServerCertificateCertificate.builder(id: 1,
+                                                                              key: try! keyPair.ecPublicKey().serialized)
+        // byte[] certificateBytes     = certificate.toByteArray();
+        let certificateData = try! certificateBuilder.build().serializedData()
 
-        //    byte[] certificateBytes     = certificate.toByteArray();
-        let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
+        // byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
+        let certificateSignature = try! Ed25519.sign(certificateData, with: trustRoot)
 
-//        byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
-        let serverCertificateSignature = try! Ed25519.sign(unsignedServerCertificateData, with: trustRoot)
+        // byte[] serialized = SignalProtos.ServerCertificate.newBuilder()
+        //     .setCertificate(ByteString.copyFrom(certificateBytes))
+        //     .setSignature(ByteString.copyFrom(certificateSignature))
+        //     .build().toByteArray();
+        //
+        let serializedData = try! SMKProtoServerCertificate.builder(certificate: certificateData,
+                                                                    signature: certificateSignature)
+            .buildSerializedData()
 
-//    byte[] serialized = SignalProtos.ServerCertificate.newBuilder()
-//    .setCertificate(ByteString.copyFrom(certificateBytes))
-//    .setSignature(ByteString.copyFrom(certificateSignature))
-//    .build().toByteArray();
-        let signedServerCertificate = SMKServerCertificate(keyId: keyId,
-                                                           key: try! keyPair.ecPublicKey(),
-                                                           signatureData: serverCertificateSignature)
-        let serializedData = try! signedServerCertificate.serialized()
-        let parsed = try! SMKServerCertificate.parse(data: serializedData)
-
-//    new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
+        // new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
+        let serverCertificate = try! SMKServerCertificate(serializedData: serializedData)
         let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-        try! certificateValidator.throwswrapped_validate(serverCertificate: parsed)
+        try! certificateValidator.throwswrapped_validate(serverCertificate: serverCertificate)
     }
 
 //    public void testBadSignature() throws Exception {
@@ -96,77 +94,83 @@ class SMKServerCertificateTest: XCTestCase {
         let trustRoot = Curve25519.generateKeyPair()
         let keyPair = Curve25519.generateKeyPair()
 
-//    SignalProtos.ServerCertificate.Certificate certificate = SignalProtos.ServerCertificate.Certificate.newBuilder()
-//    .setId(1)
-//    .setKey(ByteString.copyFrom(keyPair.getPublicKey().serialize()))
-//    .build();
-        let keyId: UInt32 = 1
-        let unsignedServerCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: keyId,
-                                                                                            key: try! keyPair.ecPublicKey().serialized)
+        // SignalProtos.ServerCertificate.Certificate certificate = SignalProtos.ServerCertificate.Certificate.newBuilder()
+        //     .setId(1)
+        //     .setKey(ByteString.copyFrom(keyPair.getPublicKey().serialize()))
+        //     .build();
+        let certificate = try! SMKProtoServerCertificateCertificate.builder(id: 1,
+                                                                            key: try! keyPair.ecPublicKey().serialized)
+            .build()
 
-//    byte[] certificateBytes     = certificate.toByteArray();
-        let unsignedServerCertificateData = try! unsignedServerCertificateBuilder.build().serializedData()
+        // byte[] certificateBytes     = certificate.toByteArray();
+        let certificateData = try! certificate.serializedData()
 
-//    byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
-        let serverCertificateSignature = try! Ed25519.sign(unsignedServerCertificateData, with: trustRoot)
+        // byte[] certificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), certificateBytes);
+        let certificateSignature = try! Ed25519.sign(certificateData, with: trustRoot)
 
-//    for (int i=0;i<certificateSignature.length;i++) {
-        for i in 0..<serverCertificateSignature.count {
-//    for (int b=0;b<8;b++) {
+        // for (int i=0;i<certificateSignature.length;i++) {
+        //   for (int b=0;b<8;b++) {
+        for i in 0..<certificateSignature.count {
             for b in 0..<8 {
-//    byte[] badSignature = new byte[certificateSignature.length];
-//    System.arraycopy(certificateSignature, 0, badSignature, 0, badSignature.length);
-                var badSignature = serverCertificateSignature
-
-//    badSignature[i] = (byte) (badSignature[i] ^ (1 << b));
-                badSignature.withUnsafeMutableBytes { (bytes: UnsafeMutablePointer<UInt8>) in
-                    bytes[i] = (UInt8)(bytes[i] ^ 1 << b)
+                // byte[] badSignature = new byte[certificateSignature.length];
+                // System.arraycopy(certificateSignature, 0, badSignature, 0, badSignature.length);
+                //
+                // badSignature[i] = (byte) (badSignature[i] ^ (1 << b));
+                var badSignature = certificateSignature
+                badSignature.withUnsafeMutableBytes { (bytes: UnsafeMutableRawBufferPointer) in
+                    bytes[i] = (bytes[i] ^ 1 << b)
                 }
 
-//    byte[] serialized = SignalProtos.ServerCertificate.newBuilder()
-//    .setCertificate(ByteString.copyFrom(certificateBytes))
-//    .setSignature(ByteString.copyFrom(badSignature))
-//    .build().toByteArray();
-                let signedServerCertificate = SMKServerCertificate(keyId: keyId,
-                                                                   key: try! keyPair.ecPublicKey(),
-                                                                   signatureData: badSignature)
-                let serializedData = try! signedServerCertificate.serialized()
-                let parsed = try! SMKServerCertificate.parse(data: serializedData)
+                // byte[] serialized = SignalProtos.ServerCertificate.newBuilder()
+                //     .setCertificate(ByteString.copyFrom(certificateBytes))
+                //     .setSignature(ByteString.copyFrom(badSignature))
+                //     .build().toByteArray();
+                let serializedData = try! SMKProtoServerCertificate.builder(certificate: certificateData,
+                                                                            signature: badSignature)
+                    .buildSerializedData()
 
-//    try {
-//    new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
-//    throw new AssertionError();
-//    } catch (InvalidCertificateException e) {
-//    // good
-//    }
+                // try {
+                //   new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
+                //   throw new AssertionError();
+                // } catch (InvalidCertificateException e) {
+                //   // good
+                // }
+                let serverCertificate = try! SMKServerCertificate(serializedData: serializedData)
                 let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: parsed))
+                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: serverCertificate))
             }
         }
 
-//    for (int i=0;i<certificateBytes.length;i++) {
-        for i in 0..<unsignedServerCertificateData.count {
-//    for (int b=0;b<8;b++) {
+        // for (int i=0;i<certificateBytes.length;i++) {
+        //   for (int b=0;b<8;b++) {
+        for i in 0..<certificateData.count {
             for b in 0..<8 {
-//    byte[] badCertificate = new byte[certificateBytes.length];
-//    System.arraycopy(certificateBytes, 0, badCertificate, 0, badCertificate.length);
-                var badCertificate = unsignedServerCertificateData
-
-//    badCertificate[i] = (byte) (badCertificate[i] ^ (1 << b));
-                badCertificate.withUnsafeMutableBytes { (bytes: UnsafeMutablePointer<UInt8>) in
-                    bytes[i] = (UInt8)(bytes[i] ^ 1 << b)
+                // byte[] badCertificate = new byte[certificateBytes.length];
+                // System.arraycopy(certificateBytes, 0, badCertificate, 0, badCertificate.length);
+                //
+                // badCertificate[i] = (byte) (badCertificate[i] ^ (1 << b));
+                var badCertificate = certificateData
+                badCertificate.withUnsafeMutableBytes { (bytes: UnsafeMutableRawBufferPointer) in
+                    bytes[i] = (bytes[i] ^ 1 << b)
                 }
 
-//    byte[] serialized = SignalProtos.ServerCertificate.newBuilder()
-//    .setCertificate(ByteString.copyFrom(badCertificate))
-//    .setSignature(ByteString.copyFrom(certificateSignature))
-//    .build().toByteArray();
-                let builder =
-                    SMKProtoServerCertificate.builder(certificate: badCertificate, signature: serverCertificateSignature)
-                let serializedData = try! builder.buildSerializedData()
-                let parsed: SMKServerCertificate
+                // byte[] serialized = SignalProtos.ServerCertificate.newBuilder()
+                //     .setCertificate(ByteString.copyFrom(badCertificate))
+                //     .setSignature(ByteString.copyFrom(certificateSignature))
+                //     .build().toByteArray();
+                let serializedData = try! SMKProtoServerCertificate.builder(certificate: badCertificate,
+                                                                            signature: certificateSignature)
+                    .buildSerializedData()
+
+                // try {
+                //   new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
+                //   throw new AssertionError();
+                // } catch (InvalidCertificateException e) {
+                //   // good
+                // }
+                let serverCertificate: SMKServerCertificate
                 do {
-                    parsed = try SMKServerCertificate.parse(data: serializedData)
+                    serverCertificate = try SMKServerCertificate(serializedData: serializedData)
                 } catch BinaryDecodingError.malformedProtobuf {
                     // Some bad certificates will fail to parse.
                     continue
@@ -192,7 +196,7 @@ class SMKServerCertificateTest: XCTestCase {
 //    }
                 //    }
                 let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
-                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: parsed))
+                XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: serverCertificate))
             }
         }
     }
