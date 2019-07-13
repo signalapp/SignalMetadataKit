@@ -1,18 +1,25 @@
 //
-//  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
 //
 
 import Foundation
 
 // See:
 // https://github.com/signalapp/libsignal-metadata-java/blob/cac0dde9de416a192e64a8940503982820870090/java/src/main/java/org/signal/libsignal/metadata/certificate/ServerCertificate.java
-@objc public class SMKServerCertificate: NSObject {
+@objc
+public class SMKServerCertificate: NSObject {
 
-    @objc public let keyId: UInt32
-    @objc public let key: ECPublicKey
-    @objc public let serializedData: Data
-    @objc public let certificateData: Data
-    @objc public let signatureData: Data
+    // private final int         keyId;
+    // private final ECPublicKey key;
+    public let keyId: UInt32
+    public let key: ECPublicKey
+
+    // private final byte[] serialized;
+    // private final byte[] certificate;
+    // private final byte[] signature;
+    public let serializedData: Data
+    public let certificateData: Data
+    public let signatureData: Data
 
     // public ServerCertificate(byte[] serialized) throws InvalidCertificateException {
     public init(serializedData: Data) throws {

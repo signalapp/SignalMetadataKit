@@ -25,7 +25,6 @@ public enum SMKCertificateError: Error {
 //    }};
     private static let kRevokedCertificateIds = Set<UInt32>()
 
-//
 //    private final ECPublicKey trustRoot;
     private let trustRoot: ECPublicKey
 
@@ -71,14 +70,12 @@ public enum SMKCertificateError: Error {
 //    }
     }
 
-//    // VisibleForTesting
-//    void validate(ServerCertificate certificate) throws InvalidCertificateException {
+    // void validate(ServerCertificate certificate) throws InvalidCertificateException {
     @objc public func throwswrapped_validate(serverCertificate: SMKServerCertificate) throws {
-//    try {
-//    if (!Curve.verifySignature(trustRoot, certificate.getCertificate(), certificate.getSignature())) {
-//    throw new InvalidCertificateException("Signature failed");
-//    }
-//            let certificateData = try serverCertificate.toProto().certificate
+        // try {
+        //   if (!Curve.verifySignature(trustRoot, certificate.getCertificate(), certificate.getSignature())) {
+        //   throw new InvalidCertificateException("Signature failed");
+        // }
         guard try Ed25519.verifySignature(serverCertificate.signatureData,
                                           publicKey: trustRoot.keyData,
                                           data: serverCertificate.certificateData) else {
@@ -86,16 +83,18 @@ public enum SMKCertificateError: Error {
                                             Logger.error("\(error)")
                                             throw error
         }
-//    if (REVOKED.contains(certificate.getKeyId())) {
-//    throw new InvalidCertificateException("Server certificate has been revoked");
-//    }
+
+        // if (REVOKED.contains(certificate.getKeyId())) {
+        //   throw new InvalidCertificateException("Server certificate has been revoked");
+        // }
         guard !SMKCertificateDefaultValidator.kRevokedCertificateIds.contains(serverCertificate.keyId) else {
             let error = SMKCertificateError.invalidCertificate(description: "Revoked certificate.")
             Logger.error("\(error)")
             throw error
         }
-//    } catch (InvalidKeyException e) {
-//    throw new InvalidCertificateException(e);
-//    }
+
+        // } catch (InvalidKeyException e) {
+        // throw new InvalidCertificateException(e);
+        // }
     }
 }

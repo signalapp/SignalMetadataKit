@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
 //
 
 import XCTest
@@ -11,52 +11,41 @@ import SignalMetadataKit
 // public class ServerCertificateTest extends TestCase {
 class SMKServerCertificateTest: XCTestCase {
 
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
-}
-
-//    public void testBadFields() {
+    // public void testBadFields() {
     func testBadFields() {
-
         // NOTE: We don't want to (and can't) test this.
         // Our Swift proto wrappers ensure that we never have missing fields.
 
-//    SignalProtos.ServerCertificate.Certificate.Builder certificate = SignalProtos.ServerCertificate.Certificate.newBuilder();
-//
-//    try {
-//    new ServerCertificate(SignalProtos.ServerCertificate.newBuilder().setSignature(ByteString.copyFrom(new byte[64])).build().toByteArray());
-//    throw new AssertionError();
-//    } catch (InvalidCertificateException e) {
-//    // good
-//    }
-//
-//    try {
-//    new ServerCertificate(SignalProtos.ServerCertificate.newBuilder().setCertificate(certificate.build().toByteString())
-//    .setSignature(ByteString.copyFrom(new byte[64])).build().toByteArray());
-//    throw new AssertionError();
-//    } catch (InvalidCertificateException e) {
-//    // good
-//    }
-//
-//    try {
-//    new ServerCertificate(SignalProtos.ServerCertificate.newBuilder().setCertificate(certificate.setId(1).build().toByteString())
-//    .setSignature(ByteString.copyFrom(new byte[64])).build().toByteArray());
-//    throw new AssertionError();
-//    } catch (InvalidCertificateException e) {
-//    // good
-//    }
+        // SignalProtos.ServerCertificate.Certificate.Builder certificate = SignalProtos.ServerCertificate.Certificate.newBuilder();
+        //
+        // try {
+        //   new ServerCertificate(SignalProtos.ServerCertificate.newBuilder().setSignature(ByteString.copyFrom(new byte[64])).build().toByteArray());
+        //   throw new AssertionError();
+        // } catch (InvalidCertificateException e) {
+        //   // good
+        // }
+        //
+        // try {
+        //   new ServerCertificate(SignalProtos.ServerCertificate.newBuilder().setCertificate(certificate.build().toByteString())
+        //      .setSignature(ByteString.copyFrom(new byte[64])).build().toByteArray());
+        //   throw new AssertionError();
+        // } catch (InvalidCertificateException e) {
+        //   // good
+        // }
+        //
+        // try {
+        //   new ServerCertificate(SignalProtos.ServerCertificate.newBuilder().setCertificate(certificate.setId(1).build().toByteString())
+        //       .setSignature(ByteString.copyFrom(new byte[64])).build().toByteArray());
+        //   throw new AssertionError();
+        // } catch (InvalidCertificateException e) {
+        //   // good
+        // }
     }
 
-//    public void testSignature() throws InvalidKeyException, InvalidCertificateException {
+    // public void testSignature() throws InvalidKeyException, InvalidCertificateException {
     func testSignature() {
-//    ECKeyPair trustRoot = Curve.generateKeyPair();
-//    ECKeyPair keyPair   = Curve.generateKeyPair();
+        // ECKeyPair trustRoot = Curve.generateKeyPair();
+        // ECKeyPair keyPair   = Curve.generateKeyPair();
         let trustRoot = Curve25519.generateKeyPair()
         let keyPair = Curve25519.generateKeyPair()
 
@@ -87,10 +76,10 @@ class SMKServerCertificateTest: XCTestCase {
         try! certificateValidator.throwswrapped_validate(serverCertificate: serverCertificate)
     }
 
-//    public void testBadSignature() throws Exception {
+    // public void testBadSignature() throws Exception {
     func testBadSignature() {
-//    ECKeyPair trustRoot = Curve.generateKeyPair();
-//    ECKeyPair keyPair   = Curve.generateKeyPair();
+        // ECKeyPair trustRoot = Curve.generateKeyPair();
+        // ECKeyPair keyPair   = Curve.generateKeyPair();
         let trustRoot = Curve25519.generateKeyPair()
         let keyPair = Curve25519.generateKeyPair()
 
@@ -187,14 +176,13 @@ class SMKServerCertificateTest: XCTestCase {
                     XCTFail("Unexpected parsing error: \(error)")
                     continue
                 }
-//
-//    try {
-//    new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
-//    throw new AssertionError();
-//    } catch (InvalidCertificateException e) {
-//    // good
-//    }
-                //    }
+
+                // try {
+                //   new CertificateValidator(trustRoot.getPublicKey()).validate(new ServerCertificate(serialized));
+                //   throw new AssertionError();
+                // } catch (InvalidCertificateException e) {
+                //   // good
+                // }
                 let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
                 XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(serverCertificate: serverCertificate))
             }

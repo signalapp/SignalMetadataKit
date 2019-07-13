@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
 //
 
 import Foundation
@@ -7,56 +7,58 @@ import Foundation
 // https://github.com/signalapp/libsignal-metadata-java/blob/master/java/src/main/java/org/signal/libsignal/metadata/protocol/UnidentifiedSenderMessage.java
 @objc public class SMKUnidentifiedSenderMessage: NSObject {
 
+    // private static final int CIPHERTEXT_VERSION = 1;
     @objc public static let kSMKMessageCipherTextVersion: UInt = 1
 
+    // private final int         version;
+    // private final ECPublicKey ephemeral;
+    // private final byte[]      encryptedStatic;
+    // private final byte[]      encryptedMessage;
+    // private final byte[]      serialized;
     public let cipherTextVersion: UInt
     public let ephemeralKey: ECPublicKey
     public let encryptedStatic: Data
     public let encryptedMessage: Data
     public let serializedData: Data
 
+    // public UnidentifiedSenderMessage(byte[] serialized) throws InvalidMetadataMessageException, InvalidMetadataVersionException
     public init(serializedData: Data) throws {
-        // public UnidentifiedSenderMessage(byte[] serialized)
-        // throws InvalidMetadataMessageException, InvalidMetadataVersionException
-
         let parser = OWSDataParser(data: serializedData)
 
         // this.version = ByteUtil.highBitsToInt(serialized[0]);
+        // if (version > CIPHERTEXT_VERSION) {
+        //   throw new InvalidMetadataVersionException("Unknown version: " + this.version);
+        // }
         let versionByte = try parser.nextByte(name: "version byte")
         self.cipherTextVersion = UInt(SerializationUtilities.highBitsToInt(fromByte: versionByte))
-
-        // if (version > CIPHERTEXT_VERSION) {
-        // throw new InvalidMetadataVersionException("Unknown version: " + this.version);
-        // }
         guard cipherTextVersion <= SMKUnidentifiedSenderMessage.kSMKMessageCipherTextVersion else {
             throw SMKError.assertionError(description: "\(type(of: self)) unknown cipherTextVersion: \(cipherTextVersion)")
         }
 
         // SignalProtos.UnidentifiedSenderMessage unidentifiedSenderMessage =
-        // SignalProtos.UnidentifiedSenderMessage.parseFrom(ByteString.copyFrom(serialized, 1, serialized.length - 1));
+        //     SignalProtos.UnidentifiedSenderMessage.parseFrom(ByteString.copyFrom(serialized, 1, serialized.length - 1));
+        // if (!unidentifiedSenderMessage.hasEphemeralPublic() ||
+        //     !unidentifiedSenderMessage.hasEncryptedStatic() ||
+        //     !unidentifiedSenderMessage.hasEncryptedMessage())
+        // {
+        //   throw new InvalidMetadataMessageException("Missing fields");
+        // }
         let protoData = try parser.remainder(name: "proto data")
         let proto = try SMKProtoUnidentifiedSenderMessage.parseData(protoData)
 
-        // if (!unidentifiedSenderMessage.hasEphemeralPublic() ||
-        // !unidentifiedSenderMessage.hasEncryptedStatic() ||
-        // !unidentifiedSenderMessage.hasEncryptedMessage())
-        // {
-        // throw new InvalidMetadataMessageException("Missing fields");
-        // }
-        // NOTE: These fields are required in the proto schema.
-
         // this.ephemeral        = Curve.decodePoint(unidentifiedSenderMessage.getEphemeralPublic().toByteArray(), 0);
-        let ephemeralKeyData = proto.ephemeralPublic
-        self.ephemeralKey = try ECPublicKey(serializedKeyData: ephemeralKeyData)
+        self.ephemeralKey = try ECPublicKey(serializedKeyData: proto.ephemeralPublic)
 
         // this.encryptedStatic  = unidentifiedSenderMessage.getEncryptedStatic().toByteArray();
-        self.encryptedStatic = proto.encryptedStatic
-
         // this.encryptedMessage = unidentifiedSenderMessage.getEncryptedMessage().toByteArray();
-        self.encryptedMessage = proto.encryptedMessage
-
         // this.serialized       = serialized;
+        self.encryptedStatic = proto.encryptedStatic
+        self.encryptedMessage = proto.encryptedMessage
         self.serializedData = serializedData
+
+        // } catch (InvalidProtocolBufferException | InvalidKeyException e) {
+        //   throw new InvalidMetadataMessageException(e);
+        // }
     }
 
     // public UnidentifiedSenderMessage(ECPublicKey ephemeral, byte[] encryptedStatic, byte[] encryptedMessage) {

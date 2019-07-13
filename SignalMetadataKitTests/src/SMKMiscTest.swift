@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
 //
 
 import XCTest
@@ -29,8 +29,7 @@ class SMKTest: XCTestCase {
         let key = try! ECPublicKey(keyData: keyData)
         XCTAssertEqual(key.keyData, keyData)
 
-        let serializedData = key.serialized
-        let parsedKey = try! ECPublicKey(serializedKeyData: serializedData)
+        let parsedKey = try! ECPublicKey(serializedKeyData: key.serialized)
         XCTAssertEqual(parsedKey.keyData, keyData)
         XCTAssertEqual(key, parsedKey)
     }
@@ -42,8 +41,9 @@ class SMKTest: XCTestCase {
         let encryptedMessage = Randomness.generateRandomBytes(200)!
 
         let message = try! SMKUnidentifiedSenderMessage(ephemeralKey: ephemeralKey,
-                                 encryptedStatic: encryptedStatic,
-                                 encryptedMessage: encryptedMessage)
+                                                        encryptedStatic: encryptedStatic,
+                                                        encryptedMessage: encryptedMessage)
+
         let parsedMessage = try! SMKUnidentifiedSenderMessage(serializedData: message.serializedData)
         XCTAssertEqual(message.cipherTextVersion, parsedMessage.cipherTextVersion)
         XCTAssertEqual(message.ephemeralKey.keyData, parsedMessage.ephemeralKey.keyData)

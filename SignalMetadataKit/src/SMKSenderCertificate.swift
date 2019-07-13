@@ -1,21 +1,31 @@
 //
-//  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
 //
 
 import Foundation
 
 // See:
 // https://github.com/signalapp/libsignal-metadata-java/blob/cac0dde9de416a192e64a8940503982820870090/java/src/main/java/org/signal/libsignal/metadata/certificate/SenderCertificate.java
-@objc public class SMKSenderCertificate: NSObject {
+@objc
+public class SMKSenderCertificate: NSObject {
 
-    @objc public let signer: SMKServerCertificate
-    @objc public let key: ECPublicKey
-    @objc public let senderDeviceId: UInt32
-    @objc public let senderRecipientId: String
-    @objc public let expirationTimestamp: UInt64
-    @objc public let serializedData: Data
-    @objc public let certificateData: Data
-    @objc public let signatureData: Data
+    // private final ServerCertificate signer;
+    // private final ECPublicKey       key;
+    // private final int               senderDeviceId;
+    // private final String            sender;
+    // private final long              expiration;
+    public let signer: SMKServerCertificate
+    public let key: ECPublicKey
+    public let senderDeviceId: UInt32
+    public let senderRecipientId: String
+    public let expirationTimestamp: UInt64
+
+    // private final byte[] serialized;
+    // private final byte[] certificate;
+    // private final byte[] signature;
+    public let serializedData: Data
+    public let certificateData: Data
+    public let signatureData: Data
 
     public init(serializedData: Data) throws {
         // SignalProtos.SenderCertificate wrapper = SignalProtos.SenderCertificate.parseFrom(serialized);

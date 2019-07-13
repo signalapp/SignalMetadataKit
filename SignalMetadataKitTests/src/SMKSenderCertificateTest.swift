@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
 //
 
 import XCTest
@@ -10,23 +10,13 @@ import SignalMetadataKit
 //public class SenderCertificateTest extends TestCase {
 class SMKSenderCertificateTest: XCTestCase {
 
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
-    }
-
-    //    private final ECKeyPair trustRoot = Curve.generateKeyPair();
+    // private final ECKeyPair trustRoot = Curve.generateKeyPair();
     let trustRoot = Curve25519.generateKeyPair()
 
-    //    public void testSignature() throws InvalidCertificateException, InvalidKeyException {
+    // public void testSignature() throws InvalidCertificateException, InvalidKeyException {
     func testSignature() {
-        //        ECKeyPair serverKey = Curve.generateKeyPair();
-        //        ECKeyPair key       = Curve.generateKeyPair();
+        // ECKeyPair serverKey = Curve.generateKeyPair();
+        // ECKeyPair key       = Curve.generateKeyPair();
         let serverKey = Curve25519.generateKeyPair()
         let key       = Curve25519.generateKeyPair()
 
@@ -60,13 +50,14 @@ class SMKSenderCertificateTest: XCTestCase {
 
         // new CertificateValidator(trustRoot.getPublicKey()).validate(senderCertificate, 31336);
         let certificateValidator = try! SMKCertificateDefaultValidator(trustRoot: trustRoot.ecPublicKey())
-        try! certificateValidator.throwswrapped_validate(senderCertificate: senderCertificate, validationTime: 31336)
+        XCTAssertNoThrow(try certificateValidator.throwswrapped_validate(senderCertificate: senderCertificate,
+                                                                         validationTime: 31336))
     }
 
-    //    public void testExpiredSignature() throws InvalidCertificateException, InvalidKeyException {
+    // public void testExpiredSignature() throws InvalidCertificateException, InvalidKeyException {
     func testExpiredSignature() {
-        //        ECKeyPair serverKey = Curve.generateKeyPair();
-        //        ECKeyPair key       = Curve.generateKeyPair();
+        // ECKeyPair serverKey = Curve.generateKeyPair();
+        // ECKeyPair key       = Curve.generateKeyPair();
         let serverKey = Curve25519.generateKeyPair()
         let key = Curve25519.generateKeyPair()
 
@@ -108,10 +99,10 @@ class SMKSenderCertificateTest: XCTestCase {
         XCTAssertThrowsError(try certificateValidator.throwswrapped_validate(senderCertificate: senderCertificate, validationTime: 31338))
     }
 
-    //    public void testBadSignature() throws InvalidCertificateException, InvalidKeyException {
+    // public void testBadSignature() throws InvalidCertificateException, InvalidKeyException {
     func testBadSignature() {
-    //        ECKeyPair serverKey = Curve.generateKeyPair();
-    //        ECKeyPair key       = Curve.generateKeyPair();
+        // ECKeyPair serverKey = Curve.generateKeyPair();
+        // ECKeyPair key       = Curve.generateKeyPair();
         let serverKey = Curve25519.generateKeyPair()
         let key = Curve25519.generateKeyPair()
 
@@ -137,13 +128,13 @@ class SMKSenderCertificateTest: XCTestCase {
         //   for (int b=0;b<8;b++) {
         for i in 0..<certificateSignature.count {
             for b in 0..<8 {
-    //                byte[] badSignature = new byte[certificateSignature.length];
-    //                System.arraycopy(certificateSignature, 0, badSignature, 0, certificateSignature.length);
+                // byte[] badSignature = new byte[certificateSignature.length];
+                // System.arraycopy(certificateSignature, 0, badSignature, 0, certificateSignature.length);
+                //
+                // badSignature[i] = (byte)(badSignature[i] ^ 1 << b);
                 var badSignature = certificateSignature
-
-    //                badSignature[i] = (byte)(badSignature[i] ^ 1 << b);
-                badSignature.withUnsafeMutableBytes { (bytes: UnsafeMutablePointer<UInt8>) in
-                    bytes[i] = (UInt8)(bytes[i] ^ 1 << b)
+                badSignature.withUnsafeMutableBytes { (bytes: UnsafeMutableRawBufferPointer) in
+                    bytes[i] = (bytes[i] ^ 1 << b)
                 }
 
                 // SenderCertificate senderCertificate = new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()

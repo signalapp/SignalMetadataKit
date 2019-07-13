@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
 //
 
 import Foundation
@@ -13,10 +13,14 @@ import Foundation
 // https://github.com/signalapp/libsignal-metadata-java/blob/0cbbbf23eaf9f46fdf2d9463f3dfab2fb3271292/java/src/main/java/org/signal/libsignal/metadata/protocol/UnidentifiedSenderMessageContent.java
 @objc public class SMKUnidentifiedSenderMessageContent: NSObject {
 
-    @objc public let messageType: SMKMessageType
-    @objc public let senderCertificate: SMKSenderCertificate
-    @objc public let contentData: Data
-    @objc public let serializedData: Data
+    // private final int               type;
+    // private final SenderCertificate senderCertificate;
+    // private final byte[]            content;
+    // private final byte[]            serialized;
+    public let messageType: SMKMessageType
+    public let senderCertificate: SMKSenderCertificate
+    public let contentData: Data
+    public let serializedData: Data
 
     // public UnidentifiedSenderMessageContent(byte[] serialized) throws InvalidMetadataMessageException, InvalidCertificateException {
     public init(serializedData: Data) throws {
