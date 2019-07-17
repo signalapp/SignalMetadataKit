@@ -30,8 +30,8 @@ message ServerCertificate {
 
 message SenderCertificate {
     message Certificate {
-        // @required
-        optional string sender = 1;
+        optional string senderE164 = 1;
+        optional string senderUuid = 6;
         // @required
         optional uint32 senderDevice = 2;
         // @required
