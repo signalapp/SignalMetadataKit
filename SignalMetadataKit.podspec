@@ -21,9 +21,7 @@ A Swift & Objective-C library used by other Signal libraries.
   s.source           = { :git => "https://github.com/signalapp/SignalMetadataKit.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/signalapp'
 
-  s.platform     = :ios, '9.0'
-  #s.ios.deployment_target = '9.0'
-  #s.osx.deployment_target = '10.9'
+  s.platform     = :ios, '10.0'
   s.requires_arc = true
 
   s.source_files  = 'SignalMetadataKit/src/**/*.{h,m,mm,swift}', 'SignalMetadataKit/Private/**/*.{h,m,mm,swift}'
