@@ -93,7 +93,7 @@ class MockClient: NSObject {
         let identityKeyPair = self.identityStore.identityKeyPair(nil)!
         let signature = try! Ed25519.sign((keyPair.publicKey as NSData).prependKeyType() as Data, with: identityKeyPair)
         let signedPreKey = SignedPreKeyRecord(id: signedPreKeyId, keyPair: keyPair, signature: signature, generatedAt: generatedAt)
-        self.signedPreKeyStore.storeSignedPreKey(signedPreKeyId, signedPreKeyRecord: signedPreKey)
+        self.signedPreKeyStore.storeSignedPreKey(signedPreKeyId, signedPreKeyRecord: signedPreKey, protocolContext: nil)
         return signedPreKey
     }
 
