@@ -1,9 +1,10 @@
 //
-//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2020 Open Whisper Systems. All rights reserved.
 //
 
 import XCTest
 import SwiftProtobuf
+import Curve25519Kit
 import SignalMetadataKit
 import SignalClient
 

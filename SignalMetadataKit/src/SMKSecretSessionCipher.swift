@@ -1,8 +1,11 @@
 //
-//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2020 Open Whisper Systems. All rights reserved.
 //
 
 import Foundation
+import AxolotlKit
+import Curve25519Kit
+import HKDFKit
 
 @objc
 public class SecretSessionKnownSenderError: NSObject, CustomNSError {

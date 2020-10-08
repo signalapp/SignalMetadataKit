@@ -1,9 +1,11 @@
 //
-//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2020 Open Whisper Systems. All rights reserved.
 //
 
 import XCTest
 import SignalMetadataKit
+import AxolotlKit
+import Curve25519Kit
 
 extension MutableCollection {
     /// Shuffles the contents of this collection.

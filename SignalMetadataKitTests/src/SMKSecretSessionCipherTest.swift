@@ -1,9 +1,11 @@
 //
-//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2020 Open Whisper Systems. All rights reserved.
 //
 
 import XCTest
 import SignalMetadataKit
+import AxolotlKit
+import Curve25519Kit
 
 // https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/SecretSessionCipherTest.java
 // public class SecretSessionCipherTest extends TestCase {

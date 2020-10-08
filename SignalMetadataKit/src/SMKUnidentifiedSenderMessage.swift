@@ -1,8 +1,11 @@
 //
-//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2020 Open Whisper Systems. All rights reserved.
 //
 
 import Foundation
+import AxolotlKit // for SerializationUtilities only
+import Curve25519Kit
+import SignalCoreKit
 
 // https://github.com/signalapp/libsignal-metadata-java/blob/master/java/src/main/java/org/signal/libsignal/metadata/protocol/UnidentifiedSenderMessage.java
 @objc public class SMKUnidentifiedSenderMessage: NSObject {

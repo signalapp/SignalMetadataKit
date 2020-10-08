@@ -1,9 +1,10 @@
 //
-//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2020 Open Whisper Systems. All rights reserved.
 //
 
 import Foundation
 import SignalMetadataKit
+import AxolotlKit // for SPKProtocolWriteContext
 
 public class MockAccountIdFinder: SMKAccountIdFinder {
     typealias AccountId = String
