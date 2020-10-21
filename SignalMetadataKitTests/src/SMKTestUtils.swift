@@ -1,9 +1,10 @@
 //
-//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2020 Open Whisper Systems. All rights reserved.
 //
 
 import Foundation
 import SignalMetadataKit
+import SignalClient
 import AxolotlKit
 
 class MockCertificateValidator: NSObject, SMKCertificateValidator {
@@ -78,21 +79,24 @@ class MockClient: NSObject {
                               deviceId: recipient.deviceId)
     }
 
-    func generateMockPreKey() -> PreKeyRecord {
+    func generateMockPreKey() -> AxolotlKit.PreKeyRecord {
         let preKeyId: Int32 = Int32(arc4random_uniform(UInt32(INT32_MAX)))
         let keyPair = Curve25519.generateKeyPair()
-        let preKey = PreKeyRecord(id: preKeyId, keyPair: keyPair, createdAt: Date())
+        let preKey = AxolotlKit.PreKeyRecord(id: preKeyId, keyPair: keyPair, createdAt: Date())
         self.preKeyStore.storePreKey(preKeyId, preKeyRecord: preKey, protocolContext: nil)
         return preKey
     }
 
-    func generateMockSignedPreKey() -> SignedPreKeyRecord {
+    func generateMockSignedPreKey() -> AxolotlKit.SignedPreKeyRecord {
         let signedPreKeyId: Int32 = Int32(arc4random_uniform(UInt32(INT32_MAX)))
-        let keyPair = Curve25519.generateKeyPair()
+        let keyPair = try! IdentityKeyPair.generate()
         let generatedAt = Date()
-        let identityKeyPair = self.identityStore.identityKeyPair(nil)!
-        let signature = try! Ed25519.sign((keyPair.publicKey as NSData).prependKeyType() as Data, with: identityKeyPair)
-        let signedPreKey = SignedPreKeyRecord(id: signedPreKeyId, keyPair: keyPair, signature: signature, generatedAt: generatedAt)
+        let identityKeyPair = self.identityStore.identityKeyPair(nil)!.identityKeyPair
+        let signature = Data(try! identityKeyPair.privateKey.generateSignature(message: keyPair.publicKey.serialize()))
+        let signedPreKey = SignedPreKeyRecord(id: signedPreKeyId,
+                                              keyPair: ECKeyPair(keyPair),
+                                              signature: signature,
+                                              generatedAt: generatedAt)
         self.signedPreKeyStore.storeSignedPreKey(signedPreKeyId, signedPreKeyRecord: signedPreKey, protocolContext: nil)
         return signedPreKey
     }
@@ -107,7 +111,7 @@ class MockClient: NSObject {
 
     func storeSession(address: SMKAddress,
                       deviceId: Int32,
-                      session: SessionRecord,
+                      session: AxolotlKit.SessionRecord,
                       protocolContext: SPKProtocolWriteContext?) {
 
         let accountId = accountIdFinder.accountId(forUuid: address.uuid,

@@ -347,14 +347,16 @@ class SMKSecretSessionCipherTest: XCTestCase {
         let bobSignedPreKey = bobMockClient.generateMockSignedPreKey()
 
         // PreKeyBundle bobBundle             = new PreKeyBundle(1, 1, 1, bobPreKey.getPublicKey(), 2, bobSignedPreKey.getKeyPair().getPublicKey(), bobSignedPreKey.getSignature(), bobIdentityKey.getPublicKey());
+        let bobSignedPreKeyData = Data(try! bobSignedPreKey.keyPair.identityKeyPair.publicKey.serialize())
+        let bobIdentityKeyData = Data(try! bobIdentityKey.identityKeyPair.publicKey.serialize())
         let bobBundle = PreKeyBundle(registrationId: bobMockClient.registrationId,
                                      deviceId: bobMockClient.deviceId,
                                      preKeyId: bobPreKey.id,
                                      preKeyPublic: try! bobPreKey.keyPair.ecPublicKey().serialized,
-                                     signedPreKeyPublic: try! bobSignedPreKey.keyPair.ecPublicKey().keyData.prependKeyType(),
+                                     signedPreKeyPublic: bobSignedPreKeyData,
                                      signedPreKeyId: bobSignedPreKey.id,
                                      signedPreKeySignature: bobSignedPreKey.signature,
-                                     identityKey: try! bobIdentityKey.ecPublicKey().keyData.prependKeyType())!
+                                     identityKey: bobIdentityKeyData)!
 
         // SessionBuilder aliceSessionBuilder = new SessionBuilder(aliceStore, new SignalProtocolAddress("+14152222222", 1));
         let aliceSessionBuilder = aliceMockClient.createSessionBuilder(forRecipient: bobMockClient)
