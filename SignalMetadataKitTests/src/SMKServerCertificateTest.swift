@@ -5,6 +5,7 @@
 import XCTest
 import SwiftProtobuf
 import SignalMetadataKit
+import SignalClient
 
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/certificate/ServerCertificateTest.java
 //
@@ -172,7 +173,7 @@ class SMKServerCertificateTest: XCTestCase {
                 } catch SMKError.assertionError {
                     // Some bad certificates will fail to parse.
                     continue
-                } catch ECKeyError.assertionError {
+                } catch SignalError.invalidKey {
                     // Some bad certificates will fail to parse.
                     continue
                 } catch {
