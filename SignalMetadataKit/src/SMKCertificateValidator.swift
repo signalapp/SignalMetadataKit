@@ -49,9 +49,8 @@ public enum SMKCertificateError: Error {
 //    if (!Curve.verifySignature(serverCertificate.getKey(), certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");
 //    }
-        guard try Ed25519.verifySignature(senderCertificate.signatureData,
-                                          publicKey: serverCertificate.key.keyData,
-                                          data: senderCertificate.certificateData) else {
+        guard try serverCertificate.key.key.verifySignature(message: senderCertificate.certificateData,
+                                                            signature: senderCertificate.signatureData) else {
             Logger.error("Sender certificate signature verification failed.")
             let error = SMKCertificateError.invalidCertificate(description: "Sender certificate signature verification failed.")
             Logger.error("\(error)")
@@ -78,12 +77,11 @@ public enum SMKCertificateError: Error {
         //   if (!Curve.verifySignature(trustRoot, certificate.getCertificate(), certificate.getSignature())) {
         //   throw new InvalidCertificateException("Signature failed");
         // }
-        guard try Ed25519.verifySignature(serverCertificate.signatureData,
-                                          publicKey: trustRoot.keyData,
-                                          data: serverCertificate.certificateData) else {
-                                            let error = SMKCertificateError.invalidCertificate(description: "Server certificate signature verification failed.")
-                                            Logger.error("\(error)")
-                                            throw error
+        guard try trustRoot.key.verifySignature(message: serverCertificate.certificateData,
+                                                signature: serverCertificate.signatureData) else {
+            let error = SMKCertificateError.invalidCertificate(description: "Server certificate signature verification failed.")
+            Logger.error("\(error)")
+            throw error
         }
 
         // if (REVOKED.contains(certificate.getKeyId())) {
