@@ -49,8 +49,8 @@ public enum SMKCertificateError: Error {
 //    if (!Curve.verifySignature(serverCertificate.getKey(), certificate.getCertificate(), certificate.getSignature())) {
 //    throw new InvalidCertificateException("Signature failed");
 //    }
-        guard try serverCertificate.key.key.verifySignature(message: senderCertificate.certificateData,
-                                                            signature: senderCertificate.signatureData) else {
+        guard try serverCertificate.key.verifySignature(message: senderCertificate.certificateData,
+                                                        signature: senderCertificate.signatureData) else {
             Logger.error("Sender certificate signature verification failed.")
             let error = SMKCertificateError.invalidCertificate(description: "Sender certificate signature verification failed.")
             Logger.error("\(error)")

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import Curve25519Kit
+import SignalClient
 
 // See:
 // https://github.com/signalapp/libsignal-metadata-java/blob/cac0dde9de416a192e64a8940503982820870090/java/src/main/java/org/signal/libsignal/metadata/certificate/SenderCertificate.java
@@ -16,7 +16,7 @@ public class SMKSenderCertificate: NSObject {
     // private final String            sender;
     // private final long              expiration;
     public let signer: SMKServerCertificate
-    public let key: ECPublicKey
+    public let key: PublicKey
     public let senderDeviceId: UInt32
     public let senderAddress: SMKAddress
     public let expirationTimestamp: UInt64
@@ -46,7 +46,7 @@ public class SMKSenderCertificate: NSObject {
         // this.signer         = new ServerCertificate(certificate.getSigner().toByteArray());
         // this.key            = Curve.decodePoint(certificate.getIdentityKey().toByteArray(), 0);
         self.signer = try SMKServerCertificate(serializedData: certificateProto.signer.serializedData())
-        self.key = try ECPublicKey(serializedKeyData: certificateProto.identityKey)
+        self.key = try PublicKey(certificateProto.identityKey)
 
         // this.sender         = certificate.getSender();
         let senderE164 = certificateProto.senderE164

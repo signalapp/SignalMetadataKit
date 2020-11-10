@@ -337,7 +337,8 @@ public class SMKDecryptResult: NSObject {
         // }
         //
         // NOTE: Constant time comparison.
-        guard messageContent.senderCertificate.key.serialized.ows_constantTimeIsEqual(to: staticKeyBytes) else {
+        let certificateKeyBytes = Data(try! messageContent.senderCertificate.key.serialize())
+        guard certificateKeyBytes.ows_constantTimeIsEqual(to: staticKeyBytes) else {
             let underlyingError = SMKError.assertionError(description: "\(logTag) Sender's certificate key does not match key used in message.")
             throw wrapAsKnownSenderError(underlyingError)
         }

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import Curve25519Kit
+import SignalClient
 
 // See:
 // https://github.com/signalapp/libsignal-metadata-java/blob/cac0dde9de416a192e64a8940503982820870090/java/src/main/java/org/signal/libsignal/metadata/certificate/ServerCertificate.java
@@ -13,7 +13,7 @@ public class SMKServerCertificate: NSObject {
     // private final int         keyId;
     // private final ECPublicKey key;
     public let keyId: UInt32
-    public let key: ECPublicKey
+    public let key: PublicKey
 
     // private final byte[] serialized;
     // private final byte[] certificate;
@@ -41,7 +41,7 @@ public class SMKServerCertificate: NSObject {
         self.keyId = certificateProto.id
 
         // this.key         = Curve.decodePoint(certificate.getKey().toByteArray(), 0);
-        self.key = try ECPublicKey(serializedKeyData: certificateProto.key)
+        self.key = try PublicKey(certificateProto.key)
 
         // this.serialized  = serialized;
         self.serializedData = serializedData
