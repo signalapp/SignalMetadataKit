@@ -33,6 +33,7 @@ extension Sequence {
 
 // See: https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/SessionCipherTest.java
 //    public class SessionCipherTest extends TestCase {
+#if false
 class SMKSessionCipherTest: XCTestCase {
 
     override func setUp() {
@@ -345,3 +346,4 @@ class SMKSessionCipherTest: XCTestCase {
         try! RatchetingSession.initializeSession(bobSessionState, sessionVersion: currentVersion, bobParameters: bobParameters)
     }
 }
+#endif

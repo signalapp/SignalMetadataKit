@@ -4,7 +4,7 @@
 
 import XCTest
 import SignalMetadataKit
-import AxolotlKit
+import SignalClient
 import Curve25519Kit
 
 // https://github.com/signalapp/libsignal-metadata-java/blob/master/tests/src/test/java/org/signal/libsignal/metadata/SecretSessionCipherTest.java
@@ -28,13 +28,13 @@ class SMKSecretSessionCipherTest: XCTestCase {
         initializeSessions(aliceMockClient: aliceMockClient, bobMockClient: bobMockClient)
 
         // ECKeyPair           trustRoot         = Curve.generateKeyPair();
-        let trustRoot = Curve25519.generateKeyPair()
+        let trustRoot = try! IdentityKeyPair.generate()
 
         // SenderCertificate   senderCertificate = createCertificateFor(trustRoot, "+14151111111", 1, aliceStore.getIdentityKeyPair().getPublicKey().getPublicKey(), 31337);
         let senderCertificate = createCertificateFor(trustRoot: trustRoot,
                                                      senderAddress: aliceMockClient.address,
                                                      senderDeviceId: UInt32(aliceMockClient.deviceId),
-                                                     identityKey: try! aliceMockClient.identityKeyPair.ecPublicKey(),
+                                                     identityKey: aliceMockClient.identityKeyPair.publicKey,
                                                      expirationTimestamp: 31337)
 
         // SecretSessionCipher aliceCipher       = new SecretSessionCipher(aliceStore);
@@ -44,7 +44,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         // senderCertificate, "smert za smert".getBytes());
         // NOTE: The java tests don't bother padding the plaintext.
         let alicePlaintext = "smert za smert".data(using: String.Encoding.utf8)!
-        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.accountId,
+        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipient: bobMockClient.address,
                                                                        deviceId: bobMockClient.deviceId,
                                                                        paddedPlaintext: alicePlaintext,
                                                                        senderCertificate: senderCertificate,
@@ -54,7 +54,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         let bobCipher: SMKSecretSessionCipher = try! bobMockClient.createSecretSessionCipher()
 
         // Pair<SignalProtocolAddress, byte[]> plaintext = bobCipher.decrypt(new CertificateValidator(trustRoot.getPublicKey()), ciphertext, 31335);
-        let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
+        let certificateValidator = SMKCertificateDefaultValidator(trustRoot: ECPublicKey(trustRoot.publicKey))
         let bobPlaintext = try! bobCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
                                                                        cipherTextData: ciphertext,
                                                                        timestamp: 31335,
@@ -84,13 +84,13 @@ class SMKSecretSessionCipherTest: XCTestCase {
 
         // ECKeyPair           trustRoot         = Curve.generateKeyPair();
         // ECKeyPair           falseTrustRoot    = Curve.generateKeyPair();
-        let trustRoot = Curve25519.generateKeyPair()
-        let falseTrustRoot = Curve25519.generateKeyPair()
+        let trustRoot = try! IdentityKeyPair.generate()
+        let falseTrustRoot = try! IdentityKeyPair.generate()
         // SenderCertificate   senderCertificate = createCertificateFor(falseTrustRoot, "+14151111111", 1, aliceStore.getIdentityKeyPair().getPublicKey().getPublicKey(), 31337);
         let senderCertificate = createCertificateFor(trustRoot: falseTrustRoot,
                                                      senderAddress: aliceMockClient.address,
                                                      senderDeviceId: UInt32(aliceMockClient.deviceId),
-                                                     identityKey: try! aliceMockClient.identityKeyPair.ecPublicKey(),
+                                                     identityKey: aliceMockClient.identityKeyPair.publicKey,
                                                      expirationTimestamp: 31337)
 
         // SecretSessionCipher aliceCipher       = new SecretSessionCipher(aliceStore);
@@ -100,7 +100,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         // senderCertificate, "и вот я".getBytes());
         // NOTE: The java tests don't bother padding the plaintext.
         let alicePlaintext = "и вот я".data(using: String.Encoding.utf8)!
-        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.accountId,
+        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipient: bobMockClient.address,
                                                                        deviceId: bobMockClient.deviceId,
                                                                        paddedPlaintext: alicePlaintext,
                                                                        senderCertificate: senderCertificate,
@@ -115,7 +115,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         // } catch (InvalidMetadataMessageException e) {
         //   // good
         // }
-        let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
+        let certificateValidator = SMKCertificateDefaultValidator(trustRoot: ECPublicKey(trustRoot.publicKey))
         do {
             _ = try bobCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
                                                            cipherTextData: ciphertext,
@@ -145,13 +145,13 @@ class SMKSecretSessionCipherTest: XCTestCase {
         initializeSessions(aliceMockClient: aliceMockClient, bobMockClient: bobMockClient)
 
         // ECKeyPair           trustRoot         = Curve.generateKeyPair();
-        let trustRoot = Curve25519.generateKeyPair()
+        let trustRoot = try! IdentityKeyPair.generate()
 
         // SenderCertificate   senderCertificate = createCertificateFor(trustRoot, "+14151111111", 1, aliceStore.getIdentityKeyPair().getPublicKey().getPublicKey(), 31337);
         let senderCertificate = createCertificateFor(trustRoot: trustRoot,
                                                      senderAddress: aliceMockClient.address,
                                                      senderDeviceId: UInt32(aliceMockClient.deviceId),
-                                                     identityKey: try! aliceMockClient.identityKeyPair.ecPublicKey(),
+                                                     identityKey: aliceMockClient.identityKeyPair.publicKey,
                                                      expirationTimestamp: 31337)
 
         // SecretSessionCipher aliceCipher       = new SecretSessionCipher(aliceStore);
@@ -161,7 +161,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         //     senderCertificate, "и вот я".getBytes());
         // NOTE: The java tests don't bother padding the plaintext.
         let alicePlaintext = "и вот я".data(using: String.Encoding.utf8)!
-        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.accountId,
+        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipient: bobMockClient.address,
                                                                        deviceId: bobMockClient.deviceId,
                                                                        paddedPlaintext: alicePlaintext,
                                                                        senderCertificate: senderCertificate,
@@ -176,7 +176,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         // } catch (InvalidMetadataMessageException e) {
         //   // good
         // }
-        let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
+        let certificateValidator = SMKCertificateDefaultValidator(trustRoot: ECPublicKey(trustRoot.publicKey))
         do {
             _ = try bobCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
                                                            cipherTextData: ciphertext,
@@ -207,14 +207,14 @@ class SMKSecretSessionCipherTest: XCTestCase {
                            bobMockClient: bobMockClient)
 
         // ECKeyPair           trustRoot         = Curve.generateKeyPair();
-        let trustRoot = Curve25519.generateKeyPair()
+        let trustRoot = try! IdentityKeyPair.generate()
         // ECKeyPair           randomKeyPair     = Curve.generateKeyPair();
-        let randomKeyPair = Curve25519.generateKeyPair()
+        let randomKeyPair = try! IdentityKeyPair.generate()
         // SenderCertificate   senderCertificate = createCertificateFor(trustRoot, "+14151111111", 1, randomKeyPair.getPublicKey(), 31337);
         let senderCertificate = createCertificateFor(trustRoot: trustRoot,
                                                      senderAddress: aliceMockClient.address,
                                                      senderDeviceId: UInt32(aliceMockClient.deviceId),
-                                                     identityKey: try! randomKeyPair.ecPublicKey(),
+                                                     identityKey: randomKeyPair.publicKey,
                                                      expirationTimestamp: 31337)
         // SecretSessionCipher aliceCipher       = new SecretSessionCipher(aliceStore);
         let aliceCipher: SMKSecretSessionCipher = try! aliceMockClient.createSecretSessionCipher()
@@ -223,7 +223,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         //    senderCertificate, "smert za smert".getBytes());
         // NOTE: The java tests don't bother padding the plaintext.
         let alicePlaintext = "smert za smert".data(using: String.Encoding.utf8)!
-        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.accountId,
+        let ciphertext = try! aliceCipher.throwswrapped_encryptMessage(recipient: bobMockClient.address,
                                                                        deviceId: bobMockClient.deviceId,
                                                                        paddedPlaintext: alicePlaintext,
                                                                        senderCertificate: senderCertificate,
@@ -237,7 +237,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         // } catch (InvalidMetadataMessageException e) {
         //   // good
         // }
-        let certificateValidator = SMKCertificateDefaultValidator(trustRoot: try! trustRoot.ecPublicKey())
+        let certificateValidator = SMKCertificateDefaultValidator(trustRoot: ECPublicKey(trustRoot.publicKey))
         do {
             _ = try bobCipher.throwswrapped_decryptMessage(certificateValidator: certificateValidator,
                                                            cipherTextData: ciphertext,
@@ -247,12 +247,11 @@ class SMKSecretSessionCipherTest: XCTestCase {
                                                            localDeviceId: bobMockClient.deviceId,
                                                            protocolContext: nil)
             XCTFail("Decryption should have failed.")
-        } catch let knownSenderError as SecretSessionKnownSenderError {
+        } catch SignalError.invalidMessage(_) {
             // Decryption is expected to fail.
-            guard case SMKError.assertionError = knownSenderError.underlyingError else {
-                XCTFail("unexpected error: \(knownSenderError.underlyingError)")
-                return
-            }
+            // FIXME: This particular failure doesn't get wrapped as a SecretSessionKnownSenderError
+            // because it's checked before the unwrapped message is returned.
+            // Why? Because it uses crypto values calculated during unwrapping to validate the sender certificate.
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -262,25 +261,26 @@ class SMKSecretSessionCipherTest: XCTestCase {
 
     // private SenderCertificate createCertificateFor(ECKeyPair trustRoot, String sender, int deviceId, ECPublicKey identityKey, long expires)
     //     throws InvalidKeyException, InvalidCertificateException, InvalidProtocolBufferException {
-    private func createCertificateFor(trustRoot: ECKeyPair,
+    private func createCertificateFor(trustRoot: IdentityKeyPair,
                                       senderAddress: SMKAddress,
                                       senderDeviceId: UInt32,
-                                      identityKey: ECPublicKey,
+                                      identityKey: PublicKey,
                                       expirationTimestamp: UInt64) -> SMKSenderCertificate {
         // ECKeyPair serverKey = Curve.generateKeyPair();
-        let serverKey = Curve25519.generateKeyPair()
+        let serverKey = try! IdentityKeyPair.generate()
 
         // byte[] serverCertificateBytes = SignalProtos.ServerCertificate.Certificate.newBuilder()
         //     .setId(1)
         //     .setKey(ByteString.copyFrom(serverKey.getPublicKey().serialize()))
         //     .build()
         //     .toByteArray();
-        let serverCertificateBuilder = SMKProtoServerCertificateCertificate.builder(id: 1,
-                                                                                    key: try! serverKey.ecPublicKey().serialized)
+        let serverCertificateBuilder = SMKProtoServerCertificateCertificate.builder(
+            id: 1,
+            key: Data(try! serverKey.publicKey.serialize()))
         let serverCertificateData = try! serverCertificateBuilder.build().serializedData()
 
         // byte[] serverCertificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), serverCertificateBytes);
-        let serverCertificateSignature = try! Ed25519.sign(serverCertificateData, with: trustRoot)
+        let serverCertificateSignature = try! trustRoot.privateKey.generateSignature(message: serverCertificateData)
 
         // ServerCertificate serverCertificate = new ServerCertificate(SignalProtos.ServerCertificate.newBuilder()
         //     .setCertificate(ByteString.copyFrom(serverCertificateBytes))
@@ -289,7 +289,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         //     .toByteArray());
         let serverCertificate: SMKServerCertificate = {
             let builder = SMKProtoServerCertificate.builder(certificate: serverCertificateData,
-                                                            signature: serverCertificateSignature)
+                                                            signature: Data(serverCertificateSignature))
 
             return try! SMKServerCertificate(serializedData: try! builder.buildSerializedData())
         }()
@@ -306,7 +306,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
             let signer = try! SMKProtoServerCertificate.parseData(serverCertificate.serializedData)
             let builder = SMKProtoSenderCertificateCertificate.builder(senderDevice: senderDeviceId,
                                                                        expires: expirationTimestamp,
-                                                                       identityKey: identityKey.serialized,
+                                                                       identityKey: Data(try! identityKey.serialize()),
                                                                        signer: signer)
             if let e164 = senderAddress.e164 {
                 builder.setSenderE164(e164)
@@ -320,7 +320,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         }()
 
         // byte[] senderCertificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), senderCertificateBytes);
-        let senderCertificateSignature = try! Ed25519.sign(senderCertificateData, with: serverKey)
+        let senderCertificateSignature = try! serverKey.privateKey.generateSignature(message: senderCertificateData)
 
         // return new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
         //     .setCertificate(ByteString.copyFrom(senderCertificateBytes))
@@ -329,7 +329,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         //     .toByteArray());
         return {
             let builder = SMKProtoSenderCertificate.builder(certificate: senderCertificateData,
-                                                            signature: senderCertificateSignature)
+                                                            signature: Data(senderCertificateSignature))
             return try! SMKSenderCertificate(serializedData: try! builder.buildSerializedData())
         }()
     }
@@ -337,35 +337,6 @@ class SMKSecretSessionCipherTest: XCTestCase {
     // private void initializeSessions(TestInMemorySignalProtocolStore aliceStore, TestInMemorySignalProtocolStore bobStore)
     //     throws InvalidKeyException, UntrustedIdentityException
     private func initializeSessions(aliceMockClient: MockClient, bobMockClient: MockClient) {
-        // ECKeyPair          bobPreKey       = Curve.generateKeyPair();
-        let bobPreKey = bobMockClient.generateMockPreKey()
-
-        // IdentityKeyPair    bobIdentityKey  = bobStore.getIdentityKeyPair();
-        let bobIdentityKey = bobMockClient.identityKeyPair
-
-        // SignedPreKeyRecord bobSignedPreKey = KeyHelper.generateSignedPreKey(bobIdentityKey, 2);
-        let bobSignedPreKey = bobMockClient.generateMockSignedPreKey()
-
-        // PreKeyBundle bobBundle             = new PreKeyBundle(1, 1, 1, bobPreKey.getPublicKey(), 2, bobSignedPreKey.getKeyPair().getPublicKey(), bobSignedPreKey.getSignature(), bobIdentityKey.getPublicKey());
-        let bobSignedPreKeyData = Data(try! bobSignedPreKey.keyPair.identityKeyPair.publicKey.serialize())
-        let bobIdentityKeyData = Data(try! bobIdentityKey.identityKeyPair.publicKey.serialize())
-        let bobBundle = PreKeyBundle(registrationId: bobMockClient.registrationId,
-                                     deviceId: bobMockClient.deviceId,
-                                     preKeyId: bobPreKey.id,
-                                     preKeyPublic: try! bobPreKey.keyPair.ecPublicKey().serialized,
-                                     signedPreKeyPublic: bobSignedPreKeyData,
-                                     signedPreKeyId: bobSignedPreKey.id,
-                                     signedPreKeySignature: bobSignedPreKey.signature,
-                                     identityKey: bobIdentityKeyData)!
-
-        // SessionBuilder aliceSessionBuilder = new SessionBuilder(aliceStore, new SignalProtocolAddress("+14152222222", 1));
-        let aliceSessionBuilder = aliceMockClient.createSessionBuilder(forRecipient: bobMockClient)
-
-        // aliceSessionBuilder.process(bobBundle);
-        try! aliceSessionBuilder.processPrekeyBundle(bobBundle, protocolContext: nil)
-
-        // bobStore.storeSignedPreKey(2, bobSignedPreKey);
-        // bobStore.storePreKey(1, new PreKeyRecord(1, bobPreKey));
-        // NOTE: These stores are taken care of in the mocks' createKey() methods above.
+        aliceMockClient.initializeSession(with: bobMockClient)
     }
 }

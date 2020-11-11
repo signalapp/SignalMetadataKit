@@ -46,6 +46,8 @@ A Swift & Objective-C library used by other Signal libraries.
   s.dependency 'SignalCoreKit'
   s.dependency 'SwiftProtobuf'
 
+  s.dependency 'SignalClient'
+
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'SignalMetadataKitTests/src/**/*.{h,m,swift}'
   end

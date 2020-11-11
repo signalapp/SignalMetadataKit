@@ -6,7 +6,7 @@ import XCTest
 import SignalMetadataKit
 import SignalCoreKit
 import Curve25519Kit
-import AxolotlKit
+import SignalClient
 
 class SMKTest: XCTestCase {
 
@@ -108,27 +108,14 @@ class SMKTest: XCTestCase {
 
         let certificateValidator = MockCertificateValidator()
 
-        let bobPrekey = bobMockClient.generateMockPreKey()
-        let bobSignedPrekey = bobMockClient.generateMockSignedPreKey()
-
-        let bobPreKeyBundle = PreKeyBundle(registrationId: bobMockClient.registrationId,
-                                           deviceId: bobMockClient.deviceId,
-                                           preKeyId: bobPrekey.id,
-                                           preKeyPublic: try! bobPrekey.keyPair.ecPublicKey().serialized,
-                                           signedPreKeyPublic: try! bobSignedPrekey.keyPair.ecPublicKey().serialized,
-                                           signedPreKeyId: bobSignedPrekey.id,
-                                           signedPreKeySignature: bobSignedPrekey.signature,
-                                           identityKey: try! bobMockClient.identityKeyPair.ecPublicKey().serialized)!
-
-        let aliceToBobSessionBuilder = aliceMockClient.createSessionBuilder(forRecipient: bobMockClient)
-        try! aliceToBobSessionBuilder.processPrekeyBundle(bobPreKeyBundle, protocolContext: nil)
+        aliceMockClient.initializeSession(with: bobMockClient)
 
         let aliceToBobCipher = try! aliceMockClient.createSecretSessionCipher()
 
         let plaintext = Randomness.generateRandomBytes(200)
-        let paddedPlaintext = (plaintext as NSData).paddedMessageBody()!
+        let paddedPlaintext = (plaintext as NSData).paddedMessageBody()
         let senderCertificate = try! SMKSenderCertificate(serializedData: try! buildSenderCertificateProto(senderClient: aliceMockClient).serializedData())
-        let encryptedMessage = try! aliceToBobCipher.throwswrapped_encryptMessage(recipientId: bobMockClient.accountId,
+        let encryptedMessage = try! aliceToBobCipher.throwswrapped_encryptMessage(recipient: bobMockClient.address,
                                                                                   deviceId: bobMockClient.deviceId,
                                                                                   paddedPlaintext: paddedPlaintext,
                                                                                   senderCertificate: senderCertificate,
@@ -170,23 +157,23 @@ class SMKTest: XCTestCase {
         let senderAddress: SMKAddress
         let senderDevice: UInt32
         let expires = NSDate.ows_millisecondTimeStamp() + kWeekInMs
-        let identityKey: ECPublicKey
+        let identityKey: IdentityKey
         let signer = buildServerCertificateProto()
 
         if let senderClient = senderClient {
             senderAddress = senderClient.address
             senderDevice = UInt32(senderClient.deviceId)
-            identityKey = try! senderClient.identityKeyPair.ecPublicKey()
+            identityKey = senderClient.identityKeyPair.identityKey
         } else {
             senderAddress = .e164("+1235551234")
             senderDevice = 123
-            identityKey = try! Curve25519.generateKeyPair().ecPublicKey()
+            identityKey = try! IdentityKeyPair.generate().identityKey
         }
 
         let certificateData: Data = {
             let builder = SMKProtoSenderCertificateCertificate.builder(senderDevice: senderDevice,
                                                                        expires: expires,
-                                                                       identityKey: identityKey.serialized,
+                                                                       identityKey: Data(try! identityKey.serialize()),
                                                                        signer: signer)
             if let e164 = senderAddress.e164 {
                 builder.setSenderE164(e164)
