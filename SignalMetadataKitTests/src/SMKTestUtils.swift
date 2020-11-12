@@ -100,14 +100,6 @@ class MockClient: NSObject {
         return signedPreKey
     }
 
-    // Each client needs their own accountIdFinder
-    let accountIdFinder = MockAccountIdFinder()
-    var accountId: String {
-        return accountIdFinder.accountId(forUuid: recipientUuid,
-                                         phoneNumber: recipientE164,
-                                         protocolContext: nil)!
-    }
-
     // Moved from SMKSecretSessionCipherTest.
     // private void initializeSessions(TestInMemorySignalProtocolStore aliceStore, TestInMemorySignalProtocolStore bobStore)
     //     throws InvalidKeyException, UntrustedIdentityException

@@ -11,11 +11,6 @@ import Curve25519Kit
 // public class SecretSessionCipherTest extends TestCase {
 class SMKSecretSessionCipherTest: XCTestCase {
 
-    override func setUp() {
-        super.setUp()
-        SMKEnvironment.shared = SMKEnvironment(accountIdFinder: MockAccountIdFinder())
-    }
-
     // public void testEncryptDecrypt() throws UntrustedIdentityException, InvalidKeyException, InvalidCertificateException, InvalidProtocolBufferException, InvalidMetadataMessageException, ProtocolDuplicateMessageException, ProtocolUntrustedIdentityException, ProtocolLegacyMessageException, ProtocolInvalidKeyException, InvalidMetadataVersionException, ProtocolInvalidVersionException, ProtocolInvalidMessageException, ProtocolInvalidKeyIdException, ProtocolNoSessionException, SelfSendException {
     func testEncryptDecrypt() {
         // TestInMemorySignalProtocolStore aliceStore = new TestInMemorySignalProtocolStore();
