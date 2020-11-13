@@ -54,30 +54,12 @@ class MockClient: NSObject {
         identityStore = protocolStore
     }
 
-//    func createSessionCipher() -> SessionCipher {
-//        return SessionCipher(sessionStore: sessionStore,
-//                             preKeyStore: preKeyStore,
-//                             signedPreKeyStore: signedPreKeyStore,
-//                             identityKeyStore: identityStore,
-//                             recipientId: accountId,
-//                             deviceId: deviceId)
-//    }
-
     func createSecretSessionCipher() throws -> SMKSecretSessionCipher {
         return try SMKSecretSessionCipher(sessionStore: sessionStore,
                                       preKeyStore: preKeyStore,
                                       signedPreKeyStore: signedPreKeyStore,
                                       identityStore: identityStore)
     }
-
-//    func createSessionBuilder(forRecipient recipient: MockClient) -> SessionBuilder {
-//        return SessionBuilder(sessionStore: sessionStore,
-//                              preKeyStore: preKeyStore,
-//                              signedPreKeyStore: signedPreKeyStore,
-//                              identityKeyStore: identityStore,
-//                              recipientId: recipient.accountId,
-//                              deviceId: recipient.deviceId)
-//    }
 
     func generateMockPreKey() -> PreKeyRecord {
         let preKeyId = UInt32(Int32.random(in: 0...Int32.max))
