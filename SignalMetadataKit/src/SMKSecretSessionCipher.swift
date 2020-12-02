@@ -199,7 +199,7 @@ fileprivate extension SMKMessageType {
     public func throwswrapped_encryptMessage(recipient: SMKAddress,
                                              deviceId: Int32,
                                              paddedPlaintext: Data,
-                                             senderCertificate: SMKSenderCertificate,
+                                             senderCertificate: SenderCertificate,
                                              protocolContext: SPKProtocolWriteContext?) throws -> Data {
         guard deviceId > 0 else {
             throw SMKError.assertionError(description: "\(SMKSecretSessionCipher.logTag) invalid deviceId")
@@ -210,7 +210,7 @@ fileprivate extension SMKMessageType {
         var protocolContextAsPtr = protocolContext
         return Data(try sealedSenderEncrypt(message: paddedPlaintext,
                                             for: recipientAddress,
-                                            from: SenderCertificate(senderCertificate.serializedData),
+                                            from: senderCertificate,
                                             sessionStore: sessionStore,
                                             identityStore: identityStore,
                                             context: &protocolContextAsPtr))
@@ -219,7 +219,7 @@ fileprivate extension SMKMessageType {
     // public Pair<SignalProtocolAddress, byte[]> decrypt(CertificateValidator validator, byte[] ciphertext, long timestamp)
     //    throws InvalidMetadataMessageException, InvalidMetadataVersionException, ProtocolInvalidMessageException, ProtocolInvalidKeyException, ProtocolNoSessionException, ProtocolLegacyMessageException, ProtocolInvalidVersionException, ProtocolDuplicateMessageException, ProtocolInvalidKeyIdException, ProtocolUntrustedIdentityException
     @objc
-    public func throwswrapped_decryptMessage(certificateValidator: SMKCertificateValidator,
+    public func throwswrapped_decryptMessage(certificateValidator: SMKCertificateValidatorObjC,
                                              cipherTextData: Data,
                                              timestamp: UInt64,
                                              localE164: String?,
@@ -244,12 +244,11 @@ fileprivate extension SMKMessageType {
             throw SMKSecretSessionCipherError.selfSentMessage
         }
 
-        // validator.validate(content.getSenderCertificate(), timestamp);
-
         do {
-            let certificateData = Data(try! messageContent.senderCertificate().serialize())
+            // validator.validate(content.getSenderCertificate(), timestamp);
+            let certificateValidator = certificateValidator as! SMKCertificateValidator
             try certificateValidator.throwswrapped_validate(
-                senderCertificate: try! SMKSenderCertificate(serializedData: certificateData),
+                senderCertificate: try messageContent.senderCertificate(),
                 validationTime: timestamp)
 
             let paddedMessagePlaintext = try throwswrapped_decrypt(messageContent: messageContent,

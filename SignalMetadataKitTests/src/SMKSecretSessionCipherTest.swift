@@ -260,73 +260,18 @@ class SMKSecretSessionCipherTest: XCTestCase {
                                       senderAddress: SMKAddress,
                                       senderDeviceId: UInt32,
                                       identityKey: PublicKey,
-                                      expirationTimestamp: UInt64) -> SMKSenderCertificate {
-        // ECKeyPair serverKey = Curve.generateKeyPair();
+                                      expirationTimestamp: UInt64) -> SenderCertificate {
         let serverKey = try! IdentityKeyPair.generate()
-
-        // byte[] serverCertificateBytes = SignalProtos.ServerCertificate.Certificate.newBuilder()
-        //     .setId(1)
-        //     .setKey(ByteString.copyFrom(serverKey.getPublicKey().serialize()))
-        //     .build()
-        //     .toByteArray();
-        let serverCertificateBuilder = SMKProtoServerCertificateCertificate.builder(
-            id: 1,
-            key: Data(try! serverKey.publicKey.serialize()))
-        let serverCertificateData = try! serverCertificateBuilder.build().serializedData()
-
-        // byte[] serverCertificateSignature = Curve.calculateSignature(trustRoot.getPrivateKey(), serverCertificateBytes);
-        let serverCertificateSignature = try! trustRoot.privateKey.generateSignature(message: serverCertificateData)
-
-        // ServerCertificate serverCertificate = new ServerCertificate(SignalProtos.ServerCertificate.newBuilder()
-        //     .setCertificate(ByteString.copyFrom(serverCertificateBytes))
-        //     .setSignature(ByteString.copyFrom(serverCertificateSignature))
-        //     .build()
-        //     .toByteArray());
-        let serverCertificate: SMKServerCertificate = {
-            let builder = SMKProtoServerCertificate.builder(certificate: serverCertificateData,
-                                                            signature: Data(serverCertificateSignature))
-
-            return try! SMKServerCertificate(serializedData: try! builder.buildSerializedData())
-        }()
-
-        // byte[] senderCertificateBytes = SignalProtos.SenderCertificate.Certificate.newBuilder()
-        //     .setSender(sender)
-        //     .setSenderDevice(deviceId)
-        //     .setIdentityKey(ByteString.copyFrom(identityKey.serialize()))
-        //     .setExpires(expires)
-        //     .setSigner(SignalProtos.ServerCertificate.parseFrom(serverCertificate.getSerialized()))
-        //     .build()
-        //     .toByteArray();
-        let senderCertificateData: Data = {
-            let signer = try! SMKProtoServerCertificate.parseData(serverCertificate.serializedData)
-            let builder = SMKProtoSenderCertificateCertificate.builder(senderDevice: senderDeviceId,
-                                                                       expires: expirationTimestamp,
-                                                                       identityKey: Data(try! identityKey.serialize()),
-                                                                       signer: signer)
-            if let e164 = senderAddress.e164 {
-                builder.setSenderE164(e164)
-            }
-
-            if let uuid = senderAddress.uuid {
-                builder.setSenderUuid(uuid.uuidString)
-            }
-
-            return try! builder.buildSerializedData()
-        }()
-
-        // byte[] senderCertificateSignature = Curve.calculateSignature(serverKey.getPrivateKey(), senderCertificateBytes);
-        let senderCertificateSignature = try! serverKey.privateKey.generateSignature(message: senderCertificateData)
-
-        // return new SenderCertificate(SignalProtos.SenderCertificate.newBuilder()
-        //     .setCertificate(ByteString.copyFrom(senderCertificateBytes))
-        //     .setSignature(ByteString.copyFrom(senderCertificateSignature))
-        //     .build()
-        //     .toByteArray());
-        return {
-            let builder = SMKProtoSenderCertificate.builder(certificate: senderCertificateData,
-                                                            signature: Data(senderCertificateSignature))
-            return try! SMKSenderCertificate(serializedData: try! builder.buildSerializedData())
-        }()
+        let serverCertificate = try! ServerCertificate(keyId: 1,
+                                                       publicKey: serverKey.publicKey,
+                                                       trustRoot: trustRoot.privateKey)
+        return try! SenderCertificate(sender: SealedSenderAddress(e164: senderAddress.e164,
+                                                                  uuidString: senderAddress.uuid?.uuidString,
+                                                                  deviceId: senderDeviceId),
+                                      publicKey: identityKey,
+                                      expiration: expirationTimestamp,
+                                      signerCertificate: serverCertificate,
+                                      signerKey: serverKey.privateKey)
     }
 
     // private void initializeSessions(TestInMemorySignalProtocolStore aliceStore, TestInMemorySignalProtocolStore bobStore)

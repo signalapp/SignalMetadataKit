@@ -37,31 +37,6 @@ class SMKTest: XCTestCase {
         XCTAssertEqual(key, parsedKey)
     }
 
-    func testUDServerCertificate() {
-        let serializedData = try! buildServerCertificateProto().serializedData()
-
-        let serverCertificate = try! SMKServerCertificate(serializedData: serializedData)
-        let roundTripped = try! SMKServerCertificate(serializedData: serverCertificate.serializedData)
-
-        XCTAssertEqual(serverCertificate.keyId, roundTripped.keyId)
-        XCTAssertEqual(serverCertificate.key, roundTripped.key)
-        XCTAssertEqual(serverCertificate.signatureData, roundTripped.signatureData)
-    }
-
-    func testUDSenderCertificate() {
-        let serializedData = try! buildSenderCertificateProto().serializedData()
-
-        let senderCertificate = try! SMKSenderCertificate(serializedData: serializedData)
-        let roundTripped = try! SMKSenderCertificate(serializedData: senderCertificate.serializedData)
-
-        XCTAssertEqual(senderCertificate.signer.serializedData, roundTripped.signer.serializedData)
-        XCTAssertEqual(senderCertificate.key, roundTripped.key)
-        XCTAssertEqual(senderCertificate.senderDeviceId, roundTripped.senderDeviceId)
-        XCTAssertEqual(senderCertificate.senderAddress, roundTripped.senderAddress)
-        XCTAssertEqual(senderCertificate.expirationTimestamp, roundTripped.expirationTimestamp)
-        XCTAssertEqual(senderCertificate.signatureData, roundTripped.signatureData)
-    }
-
     func testUDSessionCipher_encrypt() {
         // NOTE: We use MockClient to ensure consistency between of our session state.
         let aliceMockClient = MockClient(address: .e164("+13213214321"), deviceId: 456, registrationId: 123)
@@ -75,7 +50,7 @@ class SMKTest: XCTestCase {
 
         let plaintext = Randomness.generateRandomBytes(200)
         let paddedPlaintext = (plaintext as NSData).paddedMessageBody()
-        let senderCertificate = try! SMKSenderCertificate(serializedData: try! buildSenderCertificateProto(senderClient: aliceMockClient).serializedData())
+        let senderCertificate = try! SenderCertificate(buildSenderCertificateProto(senderClient: aliceMockClient).serializedData())
         let encryptedMessage = try! aliceToBobCipher.throwswrapped_encryptMessage(recipient: bobMockClient.address,
                                                                                   deviceId: bobMockClient.deviceId,
                                                                                   paddedPlaintext: paddedPlaintext,
