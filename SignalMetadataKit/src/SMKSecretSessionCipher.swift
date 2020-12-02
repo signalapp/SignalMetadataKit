@@ -94,6 +94,11 @@ private class SMKStaticKeys: NSObject {
 
 // MARK: -
 
+@objc public enum SMKMessageType: Int {
+    case whisper
+    case prekey
+}
+
 @objc
 public class SMKDecryptResult: NSObject {
 

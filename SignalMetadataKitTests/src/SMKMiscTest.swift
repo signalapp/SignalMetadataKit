@@ -37,23 +37,6 @@ class SMKTest: XCTestCase {
         XCTAssertEqual(key, parsedKey)
     }
 
-    func testUDMessage() {
-        let keyData = Randomness.generateRandomBytes(Int32(ECCKeyLength))
-        let ephemeralKey = try! ECPublicKey(keyData: keyData)
-        let encryptedStatic = Randomness.generateRandomBytes(100)
-        let encryptedMessage = Randomness.generateRandomBytes(200)
-
-        let message = try! SMKUnidentifiedSenderMessage(ephemeralKey: ephemeralKey,
-                                                        encryptedStatic: encryptedStatic,
-                                                        encryptedMessage: encryptedMessage)
-
-        let parsedMessage = try! SMKUnidentifiedSenderMessage(serializedData: message.serializedData)
-        XCTAssertEqual(message.cipherTextVersion, parsedMessage.cipherTextVersion)
-        XCTAssertEqual(message.ephemeralKey.keyData, parsedMessage.ephemeralKey.keyData)
-        XCTAssertEqual(message.encryptedStatic, parsedMessage.encryptedStatic)
-        XCTAssertEqual(message.encryptedMessage, parsedMessage.encryptedMessage)
-    }
-
     func testUDServerCertificate() {
         let serializedData = try! buildServerCertificateProto().serializedData()
 
@@ -77,28 +60,6 @@ class SMKTest: XCTestCase {
         XCTAssertEqual(senderCertificate.senderAddress, roundTripped.senderAddress)
         XCTAssertEqual(senderCertificate.expirationTimestamp, roundTripped.expirationTimestamp)
         XCTAssertEqual(senderCertificate.signatureData, roundTripped.signatureData)
-    }
-
-    func testUDMessageContent() {
-        let senderCertificateProto = buildSenderCertificateProto()
-        let senderCertificate = try! SMKSenderCertificate(serializedData: try! senderCertificateProto.serializedData())
-
-        let contentData = Randomness.generateRandomBytes(200)
-        let serializedData: Data = {
-            let builder =  SMKProtoUnidentifiedSenderMessageMessage.builder(senderCertificate: senderCertificateProto,
-                                                                            content: contentData)
-            builder.setType(.message)
-            return try! builder.buildSerializedData()
-        }()
-
-        let parsed = try! SMKUnidentifiedSenderMessageContent(serializedData: serializedData)
-        let message = try! SMKUnidentifiedSenderMessageContent(messageType: .whisper,
-                                                              senderCertificate: senderCertificate,
-                                                              contentData: contentData)
-
-        XCTAssertEqual(message.messageType, parsed.messageType)
-        XCTAssertEqual(message.senderCertificate.serializedData, parsed.senderCertificate.serializedData)
-        XCTAssertEqual(message.contentData, parsed.contentData)
     }
 
     func testUDSessionCipher_encrypt() {
