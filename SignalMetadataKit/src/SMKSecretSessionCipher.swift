@@ -202,7 +202,7 @@ fileprivate extension SMKMessageType {
                                              senderCertificate: SenderCertificate,
                                              protocolContext: SPKProtocolWriteContext?) throws -> Data {
         guard deviceId > 0 else {
-            throw SMKError.assertionError(description: "\(SMKSecretSessionCipher.logTag) invalid deviceId")
+            throw SMKError.assertionError(description: "\(String(describing: SMKSecretSessionCipher.logTag)) invalid deviceId")
         }
 
         // CiphertextMessage message = new SessionCipher(signalProtocolStore, destinationAddress).encrypt(paddedPlaintext);
@@ -235,7 +235,7 @@ fileprivate extension SMKMessageType {
                                                                   identityStore: self.identityStore,
                                                                   context: &protocolContextAsPtr)
 
-        let senderAddress = try messageContent.senderCertificate().sender()
+        let senderAddress = messageContent.senderCertificate.sender
         let localAddress = try SMKAddress(uuid: localUuid, e164: localE164)
 
         guard !SMKAddress(senderAddress).matches(localAddress) ||
@@ -248,7 +248,7 @@ fileprivate extension SMKMessageType {
             // validator.validate(content.getSenderCertificate(), timestamp);
             let certificateValidator = certificateValidator as! SMKCertificateValidator
             try certificateValidator.throwswrapped_validate(
-                senderCertificate: try messageContent.senderCertificate(),
+                senderCertificate: messageContent.senderCertificate,
                 validationTime: timestamp)
 
             let paddedMessagePlaintext = try throwswrapped_decrypt(messageContent: messageContent,
@@ -265,7 +265,7 @@ fileprivate extension SMKMessageType {
             return SMKDecryptResult(senderAddress: SMKAddress(senderAddress),
                                     senderDeviceId: Int(senderAddress.deviceId),
                                     paddedPayload: Data(paddedMessagePlaintext),
-                                    messageType: SMKMessageType(try messageContent.messageType()))
+                                    messageType: SMKMessageType(messageContent.messageType))
         } catch {
             throw SecretSessionKnownSenderError(senderAddress: SMKAddress(senderAddress),
                                                 senderDeviceId: senderAddress.deviceId,
@@ -285,7 +285,7 @@ fileprivate extension SMKMessageType {
         // message.getSenderCertificate().getSenderDeviceId());
         //
         // NOTE: We use the sender properties from the sender certificate, not from this class' properties.
-        let sender = try! messageContent.senderCertificate().sender()
+        let sender = messageContent.senderCertificate.sender
         guard sender.deviceId >= 0 && sender.deviceId <= INT32_MAX else {
             throw SMKError.assertionError(description: "\(logTag) Invalid senderDeviceId.")
         }
@@ -298,9 +298,9 @@ fileprivate extension SMKMessageType {
         // }
         var protocolContextAsPtr = protocolContext
         let plaintextData: [UInt8]
-        switch try messageContent.messageType() {
+        switch messageContent.messageType {
         case .whisper:
-            let cipherMessage = try SignalMessage(bytes: messageContent.contents())
+            let cipherMessage = try SignalMessage(bytes: messageContent.contents)
             plaintextData = try signalDecrypt(
                 message: cipherMessage,
                 from: ProtocolAddress(from: sender),
@@ -308,7 +308,7 @@ fileprivate extension SMKMessageType {
                 identityStore: identityStore,
                 context: &protocolContextAsPtr)
         case .preKey:
-            let cipherMessage = try PreKeySignalMessage(bytes: messageContent.contents())
+            let cipherMessage = try PreKeySignalMessage(bytes: messageContent.contents)
             plaintextData = try signalDecryptPreKey(
                 message: cipherMessage,
                 from: ProtocolAddress(from: sender),

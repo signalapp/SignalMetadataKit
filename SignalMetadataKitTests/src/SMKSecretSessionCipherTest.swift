@@ -23,7 +23,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         initializeSessions(aliceMockClient: aliceMockClient, bobMockClient: bobMockClient)
 
         // ECKeyPair           trustRoot         = Curve.generateKeyPair();
-        let trustRoot = try! IdentityKeyPair.generate()
+        let trustRoot = IdentityKeyPair.generate()
 
         // SenderCertificate   senderCertificate = createCertificateFor(trustRoot, "+14151111111", 1, aliceStore.getIdentityKeyPair().getPublicKey().getPublicKey(), 31337);
         let senderCertificate = createCertificateFor(trustRoot: trustRoot,
@@ -79,8 +79,8 @@ class SMKSecretSessionCipherTest: XCTestCase {
 
         // ECKeyPair           trustRoot         = Curve.generateKeyPair();
         // ECKeyPair           falseTrustRoot    = Curve.generateKeyPair();
-        let trustRoot = try! IdentityKeyPair.generate()
-        let falseTrustRoot = try! IdentityKeyPair.generate()
+        let trustRoot = IdentityKeyPair.generate()
+        let falseTrustRoot = IdentityKeyPair.generate()
         // SenderCertificate   senderCertificate = createCertificateFor(falseTrustRoot, "+14151111111", 1, aliceStore.getIdentityKeyPair().getPublicKey().getPublicKey(), 31337);
         let senderCertificate = createCertificateFor(trustRoot: falseTrustRoot,
                                                      senderAddress: aliceMockClient.address,
@@ -140,7 +140,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         initializeSessions(aliceMockClient: aliceMockClient, bobMockClient: bobMockClient)
 
         // ECKeyPair           trustRoot         = Curve.generateKeyPair();
-        let trustRoot = try! IdentityKeyPair.generate()
+        let trustRoot = IdentityKeyPair.generate()
 
         // SenderCertificate   senderCertificate = createCertificateFor(trustRoot, "+14151111111", 1, aliceStore.getIdentityKeyPair().getPublicKey().getPublicKey(), 31337);
         let senderCertificate = createCertificateFor(trustRoot: trustRoot,
@@ -202,9 +202,9 @@ class SMKSecretSessionCipherTest: XCTestCase {
                            bobMockClient: bobMockClient)
 
         // ECKeyPair           trustRoot         = Curve.generateKeyPair();
-        let trustRoot = try! IdentityKeyPair.generate()
+        let trustRoot = IdentityKeyPair.generate()
         // ECKeyPair           randomKeyPair     = Curve.generateKeyPair();
-        let randomKeyPair = try! IdentityKeyPair.generate()
+        let randomKeyPair = IdentityKeyPair.generate()
         // SenderCertificate   senderCertificate = createCertificateFor(trustRoot, "+14151111111", 1, randomKeyPair.getPublicKey(), 31337);
         let senderCertificate = createCertificateFor(trustRoot: trustRoot,
                                                      senderAddress: aliceMockClient.address,
@@ -261,7 +261,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
                                       senderDeviceId: UInt32,
                                       identityKey: PublicKey,
                                       expirationTimestamp: UInt64) -> SenderCertificate {
-        let serverKey = try! IdentityKeyPair.generate()
+        let serverKey = IdentityKeyPair.generate()
         let serverCertificate = try! ServerCertificate(keyId: 1,
                                                        publicKey: serverKey.publicKey,
                                                        trustRoot: trustRoot.privateKey)

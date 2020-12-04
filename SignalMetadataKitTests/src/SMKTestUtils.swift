@@ -43,7 +43,7 @@ class MockClient: NSObject {
         self.address = address
         self.deviceId = deviceId
         self.registrationId = registrationId
-        self.identityKeyPair = try! IdentityKeyPair.generate()
+        self.identityKeyPair = IdentityKeyPair.generate()
 
         let protocolStore = InMemorySignalProtocolStore(identity: identityKeyPair,
                                                         deviceId: UInt32(bitPattern: deviceId))
@@ -63,17 +63,17 @@ class MockClient: NSObject {
 
     func generateMockPreKey() -> PreKeyRecord {
         let preKeyId = UInt32(Int32.random(in: 0...Int32.max))
-        let preKey = try! PreKeyRecord(id: preKeyId, privateKey: try PrivateKey.generate())
+        let preKey = try! PreKeyRecord(id: preKeyId, privateKey: PrivateKey.generate())
         try! self.preKeyStore.storePreKey(preKey, id: preKeyId, context: nil)
         return preKey
     }
 
     func generateMockSignedPreKey() -> SignedPreKeyRecord {
         let signedPreKeyId = UInt32(Int32.random(in: 0...Int32.max))
-        let keyPair = try! IdentityKeyPair.generate()
+        let keyPair = IdentityKeyPair.generate()
         let generatedAt = Date()
         let identityKeyPair = try! self.identityStore.identityKeyPair(context: nil)
-        let signature = try! identityKeyPair.privateKey.generateSignature(message: try! keyPair.publicKey.serialize())
+        let signature = identityKeyPair.privateKey.generateSignature(message: keyPair.publicKey.serialize())
         let signedPreKey = try! SignedPreKeyRecord(id: signedPreKeyId,
                                                    timestamp: UInt64(generatedAt.timeIntervalSince1970),
                                                    privateKey: keyPair.privateKey,
@@ -98,11 +98,11 @@ class MockClient: NSObject {
         // PreKeyBundle bobBundle             = new PreKeyBundle(1, 1, 1, bobPreKey.getPublicKey(), 2, bobSignedPreKey.getKeyPair().getPublicKey(), bobSignedPreKey.getSignature(), bobIdentityKey.getPublicKey());
         let bobBundle = try! SignalClient.PreKeyBundle(registrationId: UInt32(bitPattern: bobMockClient.registrationId),
                                                        deviceId: UInt32(bitPattern: bobMockClient.deviceId),
-                                                       prekeyId: try! bobPreKey.id(),
-                                                       prekey: try! bobPreKey.publicKey(),
-                                                       signedPrekeyId: try! bobSignedPreKey.id(),
-                                                       signedPrekey: try! bobSignedPreKey.publicKey(),
-                                                       signedPrekeySignature: try! bobSignedPreKey.signature(),
+                                                       prekeyId: bobPreKey.id,
+                                                       prekey: bobPreKey.publicKey,
+                                                       signedPrekeyId: bobSignedPreKey.id,
+                                                       signedPrekey: bobSignedPreKey.publicKey,
+                                                       signedPrekeySignature: bobSignedPreKey.signature,
                                                        identity: bobIdentityKey.identityKey)
 
         // SessionBuilder aliceSessionBuilder = new SessionBuilder(aliceStore, new SignalProtocolAddress("+14152222222", 1));

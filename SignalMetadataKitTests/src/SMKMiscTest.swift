@@ -103,13 +103,13 @@ class SMKTest: XCTestCase {
         } else {
             senderAddress = .e164("+1235551234")
             senderDevice = 123
-            identityKey = try! IdentityKeyPair.generate().identityKey
+            identityKey = IdentityKeyPair.generate().identityKey
         }
 
         let certificateData: Data = {
             let builder = SMKProtoSenderCertificateCertificate.builder(senderDevice: senderDevice,
                                                                        expires: expires,
-                                                                       identityKey: Data(try! identityKey.serialize()),
+                                                                       identityKey: Data(identityKey.serialize()),
                                                                        signer: signer)
             if let e164 = senderAddress.e164 {
                 builder.setSenderE164(e164)
