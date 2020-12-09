@@ -207,13 +207,13 @@ fileprivate extension SMKMessageType {
 
         // CiphertextMessage message = new SessionCipher(signalProtocolStore, destinationAddress).encrypt(paddedPlaintext);
         let recipientAddress = try ProtocolAddress(from: recipient, deviceId: UInt32(bitPattern: deviceId))
-        var protocolContextAsPtr = protocolContext
+        // Allow nil contexts for testing.
         return Data(try sealedSenderEncrypt(message: paddedPlaintext,
                                             for: recipientAddress,
                                             from: senderCertificate,
                                             sessionStore: sessionStore,
                                             identityStore: identityStore,
-                                            context: &protocolContextAsPtr))
+                                            context: (protocolContext as! StoreContext?) ?? NullContext()))
     }
 
     // public Pair<SignalProtocolAddress, byte[]> decrypt(CertificateValidator validator, byte[] ciphertext, long timestamp)
@@ -230,10 +230,11 @@ fileprivate extension SMKMessageType {
             throw SMKError.assertionError(description: "\(logTag) invalid timestamp")
         }
 
-        var protocolContextAsPtr = protocolContext
+        // Allow nil contexts for testing.
+        let context = (protocolContext as! StoreContext?) ?? NullContext()
         let messageContent = try UnidentifiedSenderMessageContent(message: cipherTextData,
                                                                   identityStore: self.identityStore,
-                                                                  context: &protocolContextAsPtr)
+                                                                  context: context)
 
         let senderAddress = messageContent.senderCertificate.sender
         let localAddress = try SMKAddress(uuid: localUuid, e164: localE164)
@@ -252,7 +253,7 @@ fileprivate extension SMKMessageType {
                 validationTime: timestamp)
 
             let paddedMessagePlaintext = try throwswrapped_decrypt(messageContent: messageContent,
-                                                                   protocolContext: protocolContext)
+                                                                   context: context)
 
             // return new Pair<>(new SignalProtocolAddress(content.getSenderCertificate().getSender(),
             //     content.getSenderCertificate().getSenderDeviceId()),
@@ -279,7 +280,7 @@ fileprivate extension SMKMessageType {
     // throws InvalidVersionException, InvalidMessageException, InvalidKeyException, DuplicateMessageException,
     // InvalidKeyIdException, UntrustedIdentityException, LegacyMessageException, NoSessionException
     private func throwswrapped_decrypt(messageContent: UnidentifiedSenderMessageContent,
-                                       protocolContext: SPKProtocolWriteContext?) throws -> Data {
+                                       context: StoreContext) throws -> Data {
 
         // SignalProtocolAddress sender = new SignalProtocolAddress(message.getSenderCertificate().getSender(),
         // message.getSenderCertificate().getSenderDeviceId());
@@ -296,7 +297,6 @@ fileprivate extension SMKMessageType {
         // SessionCipher(signalProtocolStore, sender).decrypt(new PreKeySignalMessage(message.getContent())); default: throw
         // new InvalidMessageException("Unknown type: " + message.getType());
         // }
-        var protocolContextAsPtr = protocolContext
         let plaintextData: [UInt8]
         switch messageContent.messageType {
         case .whisper:
@@ -306,7 +306,7 @@ fileprivate extension SMKMessageType {
                 from: ProtocolAddress(from: sender),
                 sessionStore: sessionStore,
                 identityStore: identityStore,
-                context: &protocolContextAsPtr)
+                context: context)
         case .preKey:
             let cipherMessage = try PreKeySignalMessage(bytes: messageContent.contents)
             plaintextData = try signalDecryptPreKey(
@@ -316,7 +316,7 @@ fileprivate extension SMKMessageType {
                 identityStore: identityStore,
                 preKeyStore: preKeyStore,
                 signedPreKeyStore: signedPreKeyStore,
-                context: &protocolContextAsPtr)
+                context: context)
         case let unknownType:
             throw SMKError.assertionError(
                 description: "\(logTag) Not prepared to handle this message type: \(unknownType.rawValue)")

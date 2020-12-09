@@ -64,7 +64,7 @@ class MockClient: NSObject {
     func generateMockPreKey() -> PreKeyRecord {
         let preKeyId = UInt32(Int32.random(in: 0...Int32.max))
         let preKey = try! PreKeyRecord(id: preKeyId, privateKey: PrivateKey.generate())
-        try! self.preKeyStore.storePreKey(preKey, id: preKeyId, context: nil)
+        try! self.preKeyStore.storePreKey(preKey, id: preKeyId, context: NullContext())
         return preKey
     }
 
@@ -72,13 +72,13 @@ class MockClient: NSObject {
         let signedPreKeyId = UInt32(Int32.random(in: 0...Int32.max))
         let keyPair = IdentityKeyPair.generate()
         let generatedAt = Date()
-        let identityKeyPair = try! self.identityStore.identityKeyPair(context: nil)
+        let identityKeyPair = try! self.identityStore.identityKeyPair(context: NullContext())
         let signature = identityKeyPair.privateKey.generateSignature(message: keyPair.publicKey.serialize())
         let signedPreKey = try! SignedPreKeyRecord(id: signedPreKeyId,
                                                    timestamp: UInt64(generatedAt.timeIntervalSince1970),
                                                    privateKey: keyPair.privateKey,
                                                    signature: signature)
-        try! self.signedPreKeyStore.storeSignedPreKey(signedPreKey, id: signedPreKeyId, context: nil)
+        try! self.signedPreKeyStore.storeSignedPreKey(signedPreKey, id: signedPreKeyId, context: NullContext())
         return signedPreKey
     }
 
@@ -114,7 +114,7 @@ class MockClient: NSObject {
                                  for: bobProtocolAddress,
                                  sessionStore: sessionStore,
                                  identityStore: identityStore,
-                                 context: nil)
+                                 context: NullContext())
 
         // bobStore.storeSignedPreKey(2, bobSignedPreKey);
         // bobStore.storePreKey(1, new PreKeyRecord(1, bobPreKey));
