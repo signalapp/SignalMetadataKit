@@ -202,7 +202,7 @@ fileprivate extension SMKMessageType {
                                              senderCertificate: SenderCertificate,
                                              protocolContext: SPKProtocolWriteContext?) throws -> Data {
         guard deviceId > 0 else {
-            throw SMKError.assertionError(description: "\(String(describing: SMKSecretSessionCipher.logTag)) invalid deviceId")
+            throw SMKError.assertionError(description: "\(logTag) invalid deviceId")
         }
 
         // CiphertextMessage message = new SessionCipher(signalProtocolStore, destinationAddress).encrypt(paddedPlaintext);
@@ -260,7 +260,7 @@ fileprivate extension SMKMessageType {
             //     decrypt(content));
             //
             // NOTE: We use the sender properties from the sender certificate, not from this class' properties.
-            guard senderAddress.deviceId <= INT_MAX else {
+            guard senderAddress.deviceId <= Int32.max else {
                 throw SMKError.assertionError(description: "\(logTag) Invalid senderDeviceId.")
             }
             return SMKDecryptResult(senderAddress: SMKAddress(senderAddress),
@@ -287,7 +287,7 @@ fileprivate extension SMKMessageType {
         //
         // NOTE: We use the sender properties from the sender certificate, not from this class' properties.
         let sender = messageContent.senderCertificate.sender
-        guard sender.deviceId >= 0 && sender.deviceId <= INT32_MAX else {
+        guard sender.deviceId >= 0 && sender.deviceId <= Int32.max else {
             throw SMKError.assertionError(description: "\(logTag) Invalid senderDeviceId.")
         }
 
