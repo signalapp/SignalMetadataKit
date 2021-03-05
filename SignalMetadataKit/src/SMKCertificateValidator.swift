@@ -53,9 +53,9 @@ public protocol SMKCertificateValidator: SMKCertificateValidatorObjC {
 //    }
         guard try serverCertificate.publicKey.verifySignature(message: senderCertificate.certificateBytes,
                                                               signature: senderCertificate.signatureBytes) else {
-            Logger.error("Sender certificate signature verification failed.")
+            OWSLog.error("Sender certificate signature verification failed.")
             let error = SMKCertificateError.invalidCertificate(description: "Sender certificate signature verification failed.")
-            Logger.error("\(error)")
+            OWSLog.error("\(error)")
             throw error
         }
 
@@ -64,7 +64,7 @@ public protocol SMKCertificateValidator: SMKCertificateValidatorObjC {
 //    }
         guard validationTime <= senderCertificate.expiration else {
             let error = SMKCertificateError.invalidCertificate(description: "Certficate is expired.")
-            Logger.error("\(error)")
+            OWSLog.error("\(error)")
             throw error
         }
 
@@ -82,7 +82,7 @@ public protocol SMKCertificateValidator: SMKCertificateValidatorObjC {
         guard try trustRoot.key.verifySignature(message: serverCertificate.certificateBytes,
                                                 signature: serverCertificate.signatureBytes) else {
             let error = SMKCertificateError.invalidCertificate(description: "Server certificate signature verification failed.")
-            Logger.error("\(error)")
+            OWSLog.error("\(error)")
             throw error
         }
 
@@ -91,7 +91,7 @@ public protocol SMKCertificateValidator: SMKCertificateValidatorObjC {
         // }
         guard !SMKCertificateDefaultValidator.kRevokedCertificateIds.contains(serverCertificate.keyId) else {
             let error = SMKCertificateError.invalidCertificate(description: "Revoked certificate.")
-            Logger.error("\(error)")
+            OWSLog.error("\(error)")
             throw error
         }
 

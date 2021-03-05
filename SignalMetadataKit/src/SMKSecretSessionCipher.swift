@@ -241,7 +241,7 @@ fileprivate extension SMKMessageType {
 
         guard !SMKAddress(senderAddress).matches(localAddress) ||
                 Int32(bitPattern: senderAddress.deviceId) != localDeviceId else {
-            Logger.info("Discarding self-sent message")
+            OWSLog.info("Discarding self-sent message")
             throw SMKSecretSessionCipherError.selfSentMessage
         }
 
