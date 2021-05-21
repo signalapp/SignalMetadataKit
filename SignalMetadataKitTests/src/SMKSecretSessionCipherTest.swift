@@ -283,7 +283,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         // Test: Alice encrypt's a message using `groupEncryptMessage`
         let aliceCipher = try! aliceMockClient.createSecretSessionCipher()
         let alicePlaintext = "beltalowda".data(using: String.Encoding.utf8)!
-        let aliceCiphertext = try! aliceCipher.throwswrapped_groupEncryptMessage(
+        let aliceCiphertext = try! aliceCipher.groupEncryptMessage(
             recipients: [bobMockClient.protocolAddress],
             paddedPlaintext: alicePlaintext,
             senderCertificate: senderCertificate,
@@ -341,7 +341,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
         // Test: Alice encrypt's a message using `groupEncryptMessage`
         let aliceCipher = try! aliceMockClient.createSecretSessionCipher()
         let alicePlaintext = "beltalowda".data(using: String.Encoding.utf8)!
-        let aliceCiphertext = try! aliceCipher.throwswrapped_groupEncryptMessage(
+        let aliceCiphertext = try! aliceCipher.groupEncryptMessage(
             recipients: [bobMockClient.protocolAddress],
             paddedPlaintext: alicePlaintext,
             senderCertificate: senderCertificate,
@@ -368,9 +368,14 @@ class SMKSecretSessionCipherTest: XCTestCase {
                 protocolContext: nil)
             XCTFail("Decryption should have failed.")
         } catch let knownSenderError as SecretSessionKnownSenderError {
+            // Verify: We need to make sure that the sender, group, and contentHint are preserved
+            // through decryption failures because of missing a missing sender key. This will
+            // help with recovery.
             XCTAssertEqual(knownSenderError.senderAddress, aliceMockClient.address)
             XCTAssertEqual(knownSenderError.senderDeviceId, UInt32(aliceMockClient.deviceId))
             XCTAssertEqual(Data(knownSenderError.groupId!), "inyalowda".data(using: String.Encoding.utf8)!)
+            XCTAssertEqual(knownSenderError.contentHint, .retry)
+
             if case SignalError.invalidState(_) = knownSenderError.underlyingError {
                 // Expected
             } else {

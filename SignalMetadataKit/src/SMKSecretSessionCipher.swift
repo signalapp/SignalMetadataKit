@@ -214,13 +214,13 @@ fileprivate extension SMKMessageType {
                                             context: protocolContext ?? NullContext()))
     }
 
-    public func throwswrapped_groupEncryptMessage(recipients: [ProtocolAddress],
-                                                  paddedPlaintext: Data,
-                                                  senderCertificate: SenderCertificate,
-                                                  groupId: Data,
-                                                  distributionId: UUID,
-                                                  contentHint: UnidentifiedSenderMessageContent.ContentHint = .default,
-                                                  protocolContext: StoreContext?) throws -> Data {
+    public func groupEncryptMessage(recipients: [ProtocolAddress],
+                                    paddedPlaintext: Data,
+                                    senderCertificate: SenderCertificate,
+                                    groupId: Data,
+                                    distributionId: UUID,
+                                    contentHint: UnidentifiedSenderMessageContent.ContentHint = .default,
+                                    protocolContext: StoreContext?) throws -> Data {
 
         let senderAddress = try ProtocolAddress(from: senderCertificate.sender)
         let ciphertext = try groupEncrypt(
