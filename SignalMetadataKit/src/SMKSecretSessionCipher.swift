@@ -240,6 +240,7 @@ fileprivate extension SMKMessageType {
             udMessageContent,
             for: recipients,
             identityStore: identityStore,
+            sessionStore: sessionStore,
             context: protocolContext ?? NullContext())
 
         return Data(multiRecipientMessage)
