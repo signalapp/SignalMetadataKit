@@ -18,6 +18,12 @@ public class SecretSessionKnownSenderError: NSObject, CustomNSError {
     @objc
     public static let kSenderDeviceIdKey = "kSenderDeviceIdKey"
 
+    @objc
+    public static let kContentHintKey = "kContentHintKey"
+
+    @objc
+    public static let kGroupIdKey = "kGroupIdKey"
+
     public let senderAddress: SMKAddress
     public let senderDeviceId: UInt32
     public let groupId: Data?
@@ -44,6 +50,12 @@ public class SecretSessionKnownSenderError: NSObject, CustomNSError {
 
         if let uuid = senderAddress.uuid {
             info[type(of: self).kSenderUuidKey] = uuid
+        }
+
+        info[type(of: self).kContentHintKey] = contentHint
+
+        if let groupId = groupId {
+            info[type(of: self).kGroupIdKey] = groupId
         }
 
         return info
@@ -102,6 +114,7 @@ private class SMKStaticKeys: NSObject {
     case whisper
     case prekey
     case senderKey
+    case plaintext
 }
 
 @objc
@@ -159,6 +172,8 @@ fileprivate extension SMKMessageType {
             self = .prekey
         case .senderKey:
             self = .senderKey
+        case .plaintext:
+            self = .plaintext
         default:
             fatalError("not ready for other kinds of messages yet")
         }
@@ -350,6 +365,9 @@ fileprivate extension SMKMessageType {
                 from: ProtocolAddress(from: sender),
                 store: senderKeyStore,
                 context: context)
+        case .plaintext:
+            let plaintextMessage = try PlaintextContent(bytes: messageContent.contents)
+            plaintextData = plaintextMessage.body
         case let unknownType:
             throw SMKError.assertionError(
                 description: "\(logTag) Not prepared to handle this message type: \(unknownType.rawValue)")
