@@ -7,25 +7,10 @@ import Curve25519Kit
 import SignalCoreKit
 import SignalClient
 
-@objc
-public class SecretSessionKnownSenderError: NSObject, CustomNSError {
-    @objc
-    public static let kSenderE164Key = "kSenderE164Key"
-
-    @objc
-    public static let kSenderUuidKey = "kSenderUuidKey"
-
-    @objc
-    public static let kSenderDeviceIdKey = "kSenderDeviceIdKey"
-
-    @objc
-    public static let kContentHintKey = "kContentHintKey"
-
-    @objc
-    public static let kGroupIdKey = "kGroupIdKey"
-
+public struct SecretSessionKnownSenderError: Error {
     public let senderAddress: SMKAddress
     public let senderDeviceId: UInt32
+    public let cipherType: CiphertextMessage.MessageType
     public let groupId: Data?
     public let contentHint: UnidentifiedSenderMessageContent.ContentHint
     public let underlyingError: Error
@@ -33,32 +18,10 @@ public class SecretSessionKnownSenderError: NSObject, CustomNSError {
     init(messageContent: UnidentifiedSenderMessageContent, underlyingError: Error) {
         self.senderAddress = SMKAddress(messageContent.senderCertificate.sender)
         self.senderDeviceId = messageContent.senderCertificate.sender.deviceId
+        self.cipherType = messageContent.messageType
         self.groupId = messageContent.groupId.map { Data($0) }
         self.contentHint = messageContent.contentHint
         self.underlyingError = underlyingError
-    }
-
-    public var errorUserInfo: [String: Any] {
-        var info: [String: Any] = [
-            type(of: self).kSenderDeviceIdKey: self.senderDeviceId,
-            NSUnderlyingErrorKey: (underlyingError as NSError)
-        ]
-
-        if let e164 = senderAddress.e164 {
-            info[type(of: self).kSenderE164Key] = e164
-        }
-
-        if let uuid = senderAddress.uuid {
-            info[type(of: self).kSenderUuidKey] = uuid
-        }
-
-        info[type(of: self).kContentHintKey] = contentHint
-
-        if let groupId = groupId {
-            info[type(of: self).kGroupIdKey] = groupId
-        }
-
-        return info
     }
 }
 

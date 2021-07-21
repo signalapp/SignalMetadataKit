@@ -289,7 +289,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
             senderCertificate: senderCertificate,
             groupId: Data(),
             distributionId: distributionId,
-            contentHint: .retry,
+            contentHint: .implicit,
             protocolContext: nil).map { $0 }
 
         // This splits out irrelevant per-recipient data from the shared sender key message
