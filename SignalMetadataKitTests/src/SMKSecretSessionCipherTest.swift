@@ -347,7 +347,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
             senderCertificate: senderCertificate,
             groupId: "inyalowda".data(using: String.Encoding.utf8)!,
             distributionId: distributionId,
-            contentHint: .retry,
+            contentHint: .resendable,
             protocolContext: nil).map { $0 }
 
         // This splits out irrelevant per-recipient data from the shared sender key message
@@ -374,7 +374,7 @@ class SMKSecretSessionCipherTest: XCTestCase {
             XCTAssertEqual(knownSenderError.senderAddress, aliceMockClient.address)
             XCTAssertEqual(knownSenderError.senderDeviceId, UInt32(aliceMockClient.deviceId))
             XCTAssertEqual(Data(knownSenderError.groupId!), "inyalowda".data(using: String.Encoding.utf8)!)
-            XCTAssertEqual(knownSenderError.contentHint, .retry)
+            XCTAssertEqual(knownSenderError.contentHint, .resendable)
 
             if case SignalError.invalidState(_) = knownSenderError.underlyingError {
                 // Expected
