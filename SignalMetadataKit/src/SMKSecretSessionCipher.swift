@@ -7,19 +7,10 @@ import Curve25519Kit
 import SignalCoreKit
 import SignalClient
 
-@objc
-public class SecretSessionKnownSenderError: NSObject, CustomNSError {
-    @objc
-    public static let kSenderE164Key = "kSenderE164Key"
-
-    @objc
-    public static let kSenderUuidKey = "kSenderUuidKey"
-
-    @objc
-    public static let kSenderDeviceIdKey = "kSenderDeviceIdKey"
-
+public struct SecretSessionKnownSenderError: Error {
     public let senderAddress: SMKAddress
     public let senderDeviceId: UInt32
+    public let cipherType: CiphertextMessage.MessageType
     public let groupId: Data?
     public let contentHint: UnidentifiedSenderMessageContent.ContentHint
     public let underlyingError: Error
@@ -27,26 +18,10 @@ public class SecretSessionKnownSenderError: NSObject, CustomNSError {
     init(messageContent: UnidentifiedSenderMessageContent, underlyingError: Error) {
         self.senderAddress = SMKAddress(messageContent.senderCertificate.sender)
         self.senderDeviceId = messageContent.senderCertificate.sender.deviceId
+        self.cipherType = messageContent.messageType
         self.groupId = messageContent.groupId.map { Data($0) }
         self.contentHint = messageContent.contentHint
         self.underlyingError = underlyingError
-    }
-
-    public var errorUserInfo: [String: Any] {
-        var info: [String: Any] = [
-            type(of: self).kSenderDeviceIdKey: self.senderDeviceId,
-            NSUnderlyingErrorKey: (underlyingError as NSError)
-        ]
-
-        if let e164 = senderAddress.e164 {
-            info[type(of: self).kSenderE164Key] = e164
-        }
-
-        if let uuid = senderAddress.uuid {
-            info[type(of: self).kSenderUuidKey] = uuid
-        }
-
-        return info
     }
 }
 
@@ -102,6 +77,7 @@ private class SMKStaticKeys: NSObject {
     case whisper
     case prekey
     case senderKey
+    case plaintext
 }
 
 @objc
@@ -159,6 +135,8 @@ fileprivate extension SMKMessageType {
             self = .prekey
         case .senderKey:
             self = .senderKey
+        case .plaintext:
+            self = .plaintext
         default:
             fatalError("not ready for other kinds of messages yet")
         }
@@ -240,6 +218,7 @@ fileprivate extension SMKMessageType {
             udMessageContent,
             for: recipients,
             identityStore: identityStore,
+            sessionStore: sessionStore,
             context: protocolContext ?? NullContext())
 
         return Data(multiRecipientMessage)
@@ -349,6 +328,9 @@ fileprivate extension SMKMessageType {
                 from: ProtocolAddress(from: sender),
                 store: senderKeyStore,
                 context: context)
+        case .plaintext:
+            let plaintextMessage = try PlaintextContent(bytes: messageContent.contents)
+            plaintextData = plaintextMessage.body
         case let unknownType:
             throw SMKError.assertionError(
                 description: "\(logTag) Not prepared to handle this message type: \(unknownType.rawValue)")
